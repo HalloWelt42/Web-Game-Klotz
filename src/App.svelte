@@ -1,7 +1,7 @@
 <script lang="ts">
   import './lib/styles/global.css';
 
-  import { onMount, untrack } from 'svelte';
+  import { onMount, untrack as svelteUntrack } from 'svelte';
   import { game } from './lib/stores/game.svelte';
   import { settings } from './lib/stores/settings.svelte';
   import { stats } from './lib/stores/stats.svelte';
@@ -106,8 +106,15 @@
     showTutorial = r.kind === 'help';
     showLevelPicker = r.kind === 'levels';
     showDonate = r.kind === 'donate';
-    if (initialised && (r.kind === 'mode' || r.kind === 'level' || r.kind === 'seed' || r.kind === 'replay')) {
-      void applyRouteAction();
+    if (
+      initialised &&
+      (r.kind === 'mode' || r.kind === 'level' || r.kind === 'seed' || r.kind === 'replay')
+    ) {
+      // applyRouteAction in untrack -- sonst tracked das $effect den
+      // Spielzustand und triggert sich beim startNew sofort wieder
+      svelteUntrack(() => {
+        void applyRouteAction();
+      });
     }
   });
 
@@ -202,10 +209,13 @@
     if (!boardEl) return;
     const measure = () => {
       const rect = boardEl!.getBoundingClientRect();
-      const totalGap = (game.state.boardSize - 1) * cellGap;
+      const size = game.state.boardSize;
+      const totalGap = (size - 1) * cellGap;
       const padding = 20;
-      cellSize = Math.max(20, Math.floor((rect.width - padding - totalGap) / game.state.boardSize));
-      game.setBoardCenter(rect.left + rect.width / 2, rect.top + rect.height / 2);
+      svelteUntrack(() => {
+        cellSize = Math.max(20, Math.floor((rect.width - padding - totalGap) / size));
+        game.setBoardCenter(rect.left + rect.width / 2, rect.top + rect.height / 2);
+      });
     };
     measure();
     const ro = new ResizeObserver(measure);
