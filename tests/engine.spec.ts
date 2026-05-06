@@ -239,6 +239,122 @@ describe('engine end states', () => {
   });
 });
 
+describe('engine.shrink', () => {
+  function countBlocks(state: GameState): number {
+    let n = 0;
+    for (const v of Object.values(state.obstacles)) if (v === 'block') n += 1;
+    return n;
+  }
+
+  it('startet ohne Block-Ring', () => {
+    const s = newGame('shrink', 1);
+    expect(countBlocks(s)).toBe(0);
+  });
+
+  it('schrumpft alle 6 Züge einen Ring nach innen', () => {
+    // Direkter Test: movesCount = 5 -> nach einem weiteren Zug = 6 ergibt Ring 1
+    const u1 = pieceById('U1')!;
+    let s: GameState = {
+      ...newGame('shrink', 1),
+      movesCount: 5,
+    };
+    s = withPool(s, [
+      { piece: u1, consumed: false },
+      { piece: u1, consumed: false },
+      { piece: u1, consumed: false },
+    ]);
+    // Vor dem entscheidenden Zug: kein Ring
+    expect(countBlocks(s)).toBe(0);
+    const out = tryPlace(s, 0, 4, 4);
+    expect(out).not.toBeNull();
+    expect(out!.state.movesCount).toBe(6);
+    // Ring 1 in 10x10 -> äußerste Zellen werden Block: 4 Seiten * 10 - 4 Ecken = 36
+    expect(countBlocks(out!.state)).toBe(36);
+  });
+
+  it('schrumpft erst nach 6 Zügen, nicht früher', () => {
+    const u1 = pieceById('U1')!;
+    let s: GameState = {
+      ...newGame('shrink', 1),
+      movesCount: 4,
+    };
+    s = withPool(s, [
+      { piece: u1, consumed: false },
+      { piece: u1, consumed: false },
+      { piece: u1, consumed: false },
+    ]);
+    const out = tryPlace(s, 0, 4, 4);
+    expect(out).not.toBeNull();
+    expect(out!.state.movesCount).toBe(5);
+    expect(countBlocks(out!.state)).toBe(0);
+  });
+
+  it('Combo wird bei jedem Schrumpf-Tick zurückgesetzt', () => {
+    const u1 = pieceById('U1')!;
+    // movesCount=11 -> nach +1 wird movesCount=12, das ist der 2. Schrumpf-Tick
+    let s: GameState = {
+      ...newGame('shrink', 1),
+      combo: 7,
+      movesCount: 11,
+    };
+    s = withPool(s, [
+      { piece: u1, consumed: false },
+      { piece: u1, consumed: false },
+      { piece: u1, consumed: false },
+    ]);
+    const out = tryPlace(s, 0, 4, 4);
+    expect(out).not.toBeNull();
+    expect(out!.state.movesCount).toBe(12);
+    // Schrumpf-Tick greift -> Combo ist 0, völlig unabhängig vom vorherigen Wert
+    expect(out!.state.combo).toBe(0);
+  });
+
+  it('zwischen Schrumpf-Ticks bleibt Combo bestehen', () => {
+    const u1 = pieceById('U1')!;
+    // movesCount=7 -> nach +1 wird movesCount=8, kein Schrumpf-Tick (Ring bleibt 1)
+    let s: GameState = {
+      ...newGame('shrink', 1),
+      combo: 4,
+      movesCount: 7,
+    };
+    s = withPool(s, [
+      { piece: u1, consumed: false },
+      { piece: u1, consumed: false },
+      { piece: u1, consumed: false },
+    ]);
+    const out = tryPlace(s, 0, 4, 4);
+    expect(out).not.toBeNull();
+    expect(out!.state.movesCount).toBe(8);
+    // Ohne Linien-Räumung wäre combo=0 sowieso (newCombo = willCombo ? combo+1 : 0).
+    // Trotzdem darf der Schrumpf-Code nicht aktiv eingreifen -- wir prüfen
+    // dass der Tick-Detection-Code nicht zwischen Schrumpf-Stufen feuert.
+    // Indirekter Test: Der Block-Ring darf sich nicht verändert haben.
+    expect(countBlocks(out!.state)).toBe(36);
+  });
+
+  it('respektiert das 2x2-Mindestmaß bei 10x10', () => {
+    // Direkter Test der Schrumpf-Stufe: bei sehr hohem movesCount sollte
+    // ringCap das Wachstum begrenzen
+    const u1 = pieceById('U1')!;
+    let s: GameState = {
+      ...newGame('shrink', 1),
+      movesCount: 200, // weit über jedem ringCap
+    };
+    s = withPool(s, [
+      { piece: u1, consumed: false },
+      { piece: u1, consumed: false },
+      { piece: u1, consumed: false },
+    ]);
+    // Trigger shrinkIfNeeded indirekt durch tryPlace
+    const center = 4;
+    const out = tryPlace(s, 0, center, center);
+    if (!out) throw new Error('Zentrum sollte frei sein');
+    // ringCap = (10-2)/2 = 4 -> 4*4 = 16 Block-Felder pro Seite, gesamter Ring
+    // ergibt 10*10 - 2*2 = 96 Blocks
+    expect(countBlocks(out.state)).toBe(96);
+  });
+});
+
 describe('engine.replay', () => {
   it('kann eine Partie aus Replay rekonstruieren', () => {
     let original = newGame('endless', 12345);

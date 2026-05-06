@@ -215,16 +215,22 @@ function refillIfEmpty(state: GameState): GameState {
   return state;
 }
 
+export const SHRINK_INTERVAL = 6;
+
 function shrinkIfNeeded(state: GameState): GameState {
   if (!state.shrinking) return state;
-  const targetRing = Math.floor(state.movesCount / 12);
+  const targetRing = Math.floor(state.movesCount / SHRINK_INTERVAL);
   if (targetRing === 0) return state;
-  const obs: ObstacleMap = cloneObstacles(state.obstacles);
   const size = state.boardSize;
-  // Innen muss immer mindestens 4x4 frei bleiben, damit der Spieler
-  // weiter agieren kann -- sonst wird die Partie auswegslos.
-  const ringCap = Math.max(0, Math.floor((size - 4) / 2));
+  // Mindestinnenfläche 2x2 -- darunter wäre die Partie aussichtslos.
+  const ringCap = Math.max(0, Math.floor((size - 2) / 2));
   const ring = Math.min(targetRing, ringCap);
+  // Erkennen, ob in genau diesem Zug eine neue Schrumpfstufe gegriffen hat.
+  const previousMoves = Math.max(0, state.movesCount - 1);
+  const previousRing = Math.min(ringCap, Math.floor(previousMoves / SHRINK_INTERVAL));
+  const justShrunk = ring > previousRing;
+
+  const obs: ObstacleMap = cloneObstacles(state.obstacles);
   for (let r = 0; r < ring; r++) {
     for (let i = r; i < size - r; i++) {
       obs[obstacleKey(i, r)] = 'block';
@@ -238,6 +244,11 @@ function shrinkIfNeeded(state: GameState): GameState {
     for (let x = 0; x < size; x++) {
       if (obs[obstacleKey(x, y)] === 'block') board[y][x] = null;
     }
+  // Schrumpft das Brett gerade -- Combo abbrechen, damit kein
+  // unendlicher Combo-Aufbau mehr möglich ist.
+  if (justShrunk) {
+    return { ...state, obstacles: obs, board, combo: 0 };
+  }
   return { ...state, obstacles: obs, board };
 }
 

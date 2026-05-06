@@ -39,8 +39,8 @@
     },
     shrink: {
       title: 'Shrink',
-      tip: 'Brett schrumpft alle 12 Züge um eine Reihe nach innen. Wer bleibt am längsten am Leben?',
-      controls: ['Brettrand wird zu Block', 'Zug-Druck baut sich auf'],
+      tip: 'Brett schrumpft alle 6 Züge um eine Reihe nach innen. Jeder Schrumpf bricht die Combo. Wer bleibt am längsten am Leben?',
+      controls: ['Brettrand wird zu Block', 'Combo-Reset bei jedem Schrumpf', 'Innen am Ende nur noch 2x2'],
     },
   };
 
