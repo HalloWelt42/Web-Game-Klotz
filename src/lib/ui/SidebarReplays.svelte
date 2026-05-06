@@ -63,7 +63,7 @@
           <li>
             <i class={`fa-solid ${MODES[r.mode].icon}`}></i>
             <span class="r-mode">{MODES[r.mode].label}</span>
-            <span class="r-moves">{r.moves.length} Z.</span>
+            <span class="r-moves">{r.moves.length} {r.moves.length === 1 ? 'Zug' : 'Züge'}</span>
           </li>
         {/each}
       </ul>

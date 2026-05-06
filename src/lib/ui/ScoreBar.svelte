@@ -92,7 +92,7 @@
     {#if movesLeft !== null}
       <div class={`chip ${movesLeft <= 3 ? 'urgent' : ''}`}>
         <i class="fa-solid fa-shoe-prints"></i>
-        <span>{movesLeft} Z.</span>
+        <span>{movesLeft} {movesLeft === 1 ? 'Zug' : 'Züge'}</span>
       </div>
     {/if}
   </div>
