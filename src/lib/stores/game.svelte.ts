@@ -77,6 +77,7 @@ function createGameStore() {
   let boardCenter = $state<{ x: number; y: number }>({ x: 0, y: 0 });
   let pendingSpecial = $state<SpecialKind | null>(null);
   let paused = $state(false);
+  let gameEndHandled = false;
 
   function setBoardCenter(x: number, y: number) {
     boardCenter = { x, y };
@@ -104,6 +105,7 @@ function createGameStore() {
     toasts = [];
     pendingSpecial = null;
     paused = false;
+    gameEndHandled = false;
     if (mode === 'endless') {
       await saveEndlessSave(null);
     }
@@ -264,6 +266,8 @@ function createGameStore() {
   }
 
   async function handleGameEnd() {
+    if (gameEndHandled) return;
+    gameEndHandled = true;
     if (state.status === 'gameover') {
       playSfx('gameover', settings.value.sound);
       vibrate([20, 40, 60], settings.value.haptics);
@@ -366,8 +370,10 @@ function createGameStore() {
 
   function tickTime(deltaSeconds: number) {
     if (state.timeLimit === undefined) return;
+    if (state.status !== 'running') return;
+    const before = state.status;
     state = tickTimer($state.snapshot(state) as GameState, deltaSeconds);
-    if (state.status === 'gameover') {
+    if (before === 'running' && state.status === 'gameover') {
       void handleGameEnd();
     }
   }
