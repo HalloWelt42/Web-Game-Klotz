@@ -48,6 +48,7 @@
   let modeHint = $state<GameMode | null>(null);
   let showLevelPicker = $state(false);
   let showDonate = $state(false);
+  let showSurrenderConfirm = $state(false);
 
   let initialised = $state(false);
 
@@ -326,6 +327,15 @@
       <i class={`fa-solid ${game.paused ? 'fa-play' : 'fa-pause'}`}></i>
     </button>
     <button
+      class="ghost"
+      title="Partie beenden"
+      aria-label="Partie beenden"
+      disabled={game.state.status !== 'running'}
+      onclick={() => (showSurrenderConfirm = true)}
+    >
+      <i class="fa-solid fa-flag"></i>
+    </button>
+    <button
       class="ghost new-game"
       title="Neue Partie / Modus waehlen"
       aria-label="Neue Partie"
@@ -450,6 +460,30 @@
   {#snippet footer()}
     <button class="ghost" onclick={startFreshGame}>Neu starten</button>
     <button class="primary" onclick={resumeSavedGame}>Fortsetzen</button>
+  {/snippet}
+</Modal>
+
+<Modal
+  open={showSurrenderConfirm}
+  title="Partie beenden?"
+  onClose={() => (showSurrenderConfirm = false)}
+>
+  <p>
+    Die laufende Partie wird sofort als beendet gewertet. Dein Punktestand zaehlt zur Statistik
+    und wird als Replay gespeichert.
+  </p>
+  {#snippet footer()}
+    <button class="ghost" onclick={() => (showSurrenderConfirm = false)}>Abbrechen</button>
+    <button
+      class="primary danger"
+      onclick={() => {
+        showSurrenderConfirm = false;
+        game.surrender();
+      }}
+    >
+      <i class="fa-solid fa-flag"></i>
+      Beenden
+    </button>
   {/snippet}
 </Modal>
 

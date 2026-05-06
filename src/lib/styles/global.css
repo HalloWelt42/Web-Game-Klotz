@@ -73,6 +73,19 @@ button.primary:hover:not(:disabled) {
   background: var(--accent-strong);
 }
 
+button.primary.danger {
+  background: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 70%, black 30%);
+}
+
+button.primary.danger:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--danger) 80%, black 20%);
+}
+
+button.ghost.danger {
+  color: var(--danger);
+}
+
 button.ghost {
   background: transparent;
   border-color: transparent;
