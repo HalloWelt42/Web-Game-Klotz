@@ -115,7 +115,7 @@
       return `Levels - ${lvl?.title ?? chosenLevelId}`;
     }
     const size = settings.value.boardSize;
-    const seedPart = chosenSeed ? ` - Seed "${chosenSeed.value}"` : '';
+    const seedPart = chosenSeed ? ` - Steinfolge "${chosenSeed.value}"` : '';
     return `${cfg.label} ${size}x${size}${seedPart}`;
   });
 </script>
@@ -190,7 +190,7 @@
       </div>
     {:else if step === 2 && mode}
       <div class="step-body">
-        <h3>Brettgroesse</h3>
+        <h3>Brettgröße</h3>
         <div class="size-grid">
           {#each sizes as s}
             <button
@@ -206,7 +206,7 @@
               </div>
               <strong>{s} x {s}</strong>
               <small>
-                {s === 6 ? 'Schnell und knackig' : s === 8 ? 'Knapp und taktisch' : s === 10 ? 'Klassisch' : 'Weitlaeufig'}
+                {s === 6 ? 'Schnell und knackig' : s === 8 ? 'Knapp und taktisch' : s === 10 ? 'Klassisch' : 'Weitläufig'}
               </small>
             </button>
           {/each}
@@ -215,13 +215,17 @@
         <div class="seed-toggle">
           <button class="ghost" type="button" onclick={() => (useCustomSeed = !useCustomSeed)}>
             <i class="fa-solid fa-key"></i>
-            {useCustomSeed ? 'Ohne Seed' : 'Eigenen Seed setzen'}
+            {useCustomSeed ? 'Ohne feste Steinfolge' : 'Eigene Steinfolge wählen'}
           </button>
           {#if useCustomSeed}
+            <p class="seed-info">
+              Tippe ein Stichwort ein -- daraus wird eine Stein-Reihenfolge erzeugt, die immer gleich
+              bleibt. Spiele dieselbe Folge mehrmals und versuche dich selbst zu schlagen.
+            </p>
             <div class="seed-row">
               <input
                 type="text"
-                placeholder="z.B. 12345 oder 'klotz'"
+                placeholder="z.B. klotz, sonntag, 42"
                 bind:value={seedInput}
                 onkeydown={(e) => {
                   if (e.key === 'Enter') {
@@ -572,6 +576,13 @@
     display: grid;
     grid-template-columns: 1fr auto;
     gap: 8px;
+  }
+
+  .seed-info {
+    margin: 0;
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.45;
   }
 
   /* Step 3 -- Summary */

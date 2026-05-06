@@ -15,11 +15,12 @@ Block-Puzzle-Spiel im 1010!-Stil als Web-PWA. Lokal, offline, ohne Tracker.
 ## Modi
 
 - **Endless** -- klassisch, Solvability-Garantie schiebt nur platzierbare Pools
-- **Tages-Challenge** -- weltweit gleicher Steinverlauf pro Tag, Ranking über 30-Tage-Verlauf
+- **Tages-Challenge** -- pro Tag eine fest vorgegebene Steinfolge, dein Tagesergebnis im 30-Tage-Verlauf
 - **Levels** -- 10 Stufen mit Hindernissen (Block + Eis), Punkt- und Zugzielen, 1-3 Sterne je nach Effizienz
 - **Zeitrennen** -- 180 Sekunden, Combo zählt doppelt
 - **Reverse** -- Brett startet voll, Ziel: 8 Linien räumen
 - **Shrink** -- Brett schrumpft alle 12 Züge
+- **Eigene Steinfolge** -- per Stichwort eine Steinfolge fixieren und mehrmals dieselbe Partie spielen
 
 ## Specials
 
@@ -40,8 +41,8 @@ Specials werden über die Specials-Bar unter dem Pool ausgewählt und durch Klic
 - `/`, `/endless`, `/daily`, `/timed`, `/reverse`, `/shrink`
 - `/endless/6` etc. für optionale Brettgröße
 - `/levels`, `/levels/level-3` direkt ins Level
-- `/seed/<wert>` für Custom-Seed-Speedruns
-- `/replay/<mode>/<seed>/<moves>` für geteilte Replays
+- `/seed/<stichwort>` für eine eigene fixierte Steinfolge
+- `/replay/<mode>/<seed>/<moves>` -- Klotz speichert deine Partien lokal und kann sie über die URL eindeutig rekonstruieren
 - `/stats`, `/achievements`, `/replays`, `/settings`, `/help`, `/danke`
 
 ## Stack
@@ -79,7 +80,7 @@ Daten löschen über Einstellungen > Alle Daten löschen.
 
 ## Datenschutz
 
-Keine externen Requests. Keine Telemetrie. Keine Werbung. Kein Backend.
+Reines Single-Player-Spiel. Keine externen Requests, keine Telemetrie, keine Werbung, kein Backend, kein Account, keine Vergleiche mit anderen -- nur du gegen deine eigene Bestleistung.
 
 ## Lizenz
 

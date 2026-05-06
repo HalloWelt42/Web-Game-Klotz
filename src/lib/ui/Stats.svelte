@@ -115,7 +115,7 @@
 
     {#if last7Daily.length > 0}
       <section>
-        <h3>Tages-Challenge der letzten Tage</h3>
+        <h3>Eigene Tagesergebnisse</h3>
         <ul class="daily">
           {#each last7Daily as d}
             <li>
@@ -129,7 +129,7 @@
 
     {#if last30.length > 0}
       <section>
-        <h3>30-Tage-Verlauf</h3>
+        <h3>Verlauf der letzten 30 Tage</h3>
         <div class="bars" aria-hidden="true">
           {#each last30 as d}
             {@const top = Math.max(...last30.map((x) => x.score), 1)}
@@ -141,7 +141,7 @@
 
     {#if weekly.length > 0}
       <section>
-        <h3>Wochenliga (letzte 8 Wochen)</h3>
+        <h3>Wochen-Rückblick (deine letzten 8 Wochen)</h3>
         <ul class="weekly">
           {#each weekly as w}
             <li>

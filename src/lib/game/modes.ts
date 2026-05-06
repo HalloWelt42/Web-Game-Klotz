@@ -78,7 +78,7 @@ export const MODES: Record<GameMode, ModeConfig> = {
   daily: {
     id: 'daily',
     label: 'Tages-Challenge',
-    description: 'Heute fuer alle der gleiche Stein-Verlauf. Vergleichbarer Highscore.',
+    description: 'Pro Tag eine feste Steinfolge -- dein Tagesergebnis im 30-Tage-Verlauf.',
     icon: 'fa-calendar-day',
     boardSize: 10,
     poolFilter: () => true,

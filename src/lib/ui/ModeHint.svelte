@@ -19,8 +19,8 @@
     },
     daily: {
       title: 'Tages-Challenge',
-      tip: 'Heute fuer alle der gleiche Stein-Verlauf -- vergleichbarer Highscore. Die Solvability-Garantie ist hier abgeschaltet.',
-      controls: ['Reine Zufallsfolge anhand des Datums', 'Tagesrangliste in der Statistik'],
+      tip: 'Jeden Tag bekommst du eine feste Steinfolge, die nur vom Datum abhängt. Mehrmals spielen geht, der höchste Wert pro Tag wird gespeichert.',
+      controls: ['Steinfolge fix bis Mitternacht', 'Eigene Tagesergebnisse im 30-Tage-Verlauf', 'Solvability-Garantie ist abgeschaltet -- die Folge ist wie sie ist'],
     },
     level: {
       title: 'Levels',
