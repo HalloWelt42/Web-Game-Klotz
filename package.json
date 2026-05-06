@@ -2,7 +2,7 @@
   "name": "klotz",
   "description": "Klotz -- ein lokales Block-Puzzle-Spiel im 1010!-Stil",
   "private": true,
-  "version": "0.2.1",
+  "version": "0.2.2",
   "type": "module",
   "scripts": {
     "dev": "vite",

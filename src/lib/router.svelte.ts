@@ -35,7 +35,8 @@ export type Route =
   | { kind: 'settings' }
   | { kind: 'help' }
   | { kind: 'donate' }
-  | { kind: 'new-game' };
+  | { kind: 'new-game' }
+  | { kind: 'sound-lab' };
 
 const VALID_SIZES: BoardSize[] = [6, 8, 10, 12];
 
@@ -84,6 +85,8 @@ export function parseRoute(pathname: string): Route {
   if (path === '/help') return { kind: 'help' };
   if (path === '/danke' || path === '/donate') return { kind: 'donate' };
   if (path === '/neue-partie' || path === '/new-game') return { kind: 'new-game' };
+  // Sound-Lab: Dev-/Test-Seite, bewusst nicht aus dem Spiel verlinkt
+  if (path === '/sound-lab') return { kind: 'sound-lab' };
 
   if (path in PATH_TO_MODE) {
     return { kind: 'mode', mode: PATH_TO_MODE[path] };
@@ -176,6 +179,8 @@ export function routeToPath(route: Route): string {
       return '/danke';
     case 'new-game':
       return '/neue-partie';
+    case 'sound-lab':
+      return '/sound-lab';
   }
 }
 

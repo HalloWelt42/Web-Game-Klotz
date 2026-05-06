@@ -28,6 +28,7 @@
   import DragGhost from './lib/ui/DragGhost.svelte';
   import ToastStack from './lib/ui/ToastStack.svelte';
   import FxOverlay from './lib/ui/FxOverlay.svelte';
+  import SoundLab from './lib/ui/SoundLab.svelte';
   import type { GameMode } from './lib/game/types';
   import { newFromReplay } from './lib/game/engine';
   import type { Replay } from './lib/game/types';
@@ -311,6 +312,11 @@
   }
 </script>
 
+<svelte:window onkeydown={handleGlobalKey} />
+
+{#if router.route.kind === 'sound-lab'}
+  <SoundLab />
+{:else}
 <Topbar
   onNewGame={openNewGame}
   onSurrender={() => (showSurrenderConfirm = true)}
@@ -320,8 +326,6 @@
   onOpenDonate={() => openOverlay('donate')}
   onOpenSettings={() => openOverlay('settings')}
 />
-
-<svelte:window onkeydown={handleGlobalKey} />
 
 <main
   class:home={router.route.kind === 'home'}
@@ -423,6 +427,7 @@
     </button>
   {/snippet}
 </Modal>
+{/if}
 
 <style>
   :global(html, body) {
