@@ -32,17 +32,26 @@
     }, 900);
     return () => clearTimeout(t);
   });
+
+  // Wenn der Spezial direkt nach dem Verdienen wieder verbraucht ist,
+  // soll das Flash-Highlight sofort verschwinden.
+  $effect(() => {
+    if (!earnedFlash) return;
+    if (game.state.specials[earnedFlash.kind] <= 0) {
+      earnedFlash = null;
+    }
+  });
 </script>
 
 <div class="bar" aria-label="Power-Ups">
   {#each items as item}
     {@const count = game.state.specials[item.kind] ?? 0}
-    {@const flashing = earnedFlash?.kind === item.kind}
+    {@const flashing = earnedFlash?.kind === item.kind && count > 0}
     <button
       type="button"
       class="slot"
       class:available={count > 0}
-      class:active={game.pendingSpecial === item.kind}
+      class:active={game.pendingSpecial === item.kind && count > 0}
       class:flashing
       data-kind={item.kind}
       disabled={count === 0}
