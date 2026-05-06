@@ -78,6 +78,7 @@ function createGameStore() {
   let pendingSpecial = $state<SpecialKind | null>(null);
   let paused = $state(false);
   let gameEndHandled = false;
+  let gameEndDismissed = $state(false);
 
   function setBoardCenter(x: number, y: number) {
     boardCenter = { x, y };
@@ -106,6 +107,7 @@ function createGameStore() {
     pendingSpecial = null;
     paused = false;
     gameEndHandled = false;
+    gameEndDismissed = false;
     if (mode === 'endless') {
       await saveEndlessSave(null);
     }
@@ -116,6 +118,12 @@ function createGameStore() {
     if (!resumePrompt) return;
     state = resumePrompt;
     resumePrompt = null;
+    gameEndHandled = false;
+    drag = { active: false };
+    paused = false;
+    pendingSpecial = null;
+    fx = [];
+    toasts = [];
   }
 
   async function persist() {
@@ -268,6 +276,10 @@ function createGameStore() {
   async function handleGameEnd() {
     if (gameEndHandled) return;
     gameEndHandled = true;
+    // Aktive UI-Zustaende sauber abraeumen, damit nichts haengt
+    drag = { active: false };
+    paused = false;
+    pendingSpecial = null;
     if (state.status === 'gameover') {
       playSfx('gameover', settings.value.sound);
       vibrate([20, 40, 60], settings.value.haptics);
@@ -412,6 +424,9 @@ function createGameStore() {
     get paused() {
       return paused;
     },
+    get gameEndDismissed() {
+      return gameEndDismissed;
+    },
     pause() {
       if (state.status === 'running') paused = true;
     },
@@ -445,9 +460,11 @@ function createGameStore() {
     selectSpecial,
     useSpecialAt,
     dismissGameEnd() {
-      if (state.status === 'gameover' || state.status === 'won') {
-        state = { ...state, status: 'running' };
-      }
+      // Beendetes Spiel optisch wegklappen, ohne neu zu starten.
+      // Status bleibt logisch 'gameover'/'won', sodass keine Logik
+      // ihn wieder spielbar macht. Das Modal schliesst sich, weil wir
+      // ein internes Flag setzen.
+      gameEndDismissed = true;
     },
   };
 }

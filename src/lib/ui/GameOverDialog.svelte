@@ -4,7 +4,10 @@
   import { withBase } from '../router.svelte';
   import Modal from './Modal.svelte';
 
-  const open = $derived(game.state.status === 'gameover' || game.state.status === 'won');
+  const open = $derived(
+    !game.gameEndDismissed &&
+      (game.state.status === 'gameover' || game.state.status === 'won'),
+  );
   const won = $derived(game.state.status === 'won');
 
   let copied = $state(false);
