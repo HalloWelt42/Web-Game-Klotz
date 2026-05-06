@@ -64,7 +64,6 @@
           <span class="earned-pop" aria-hidden="true">+1</span>
         {/if}
       </div>
-      <span class="lbl">{item.label}</span>
       <span class="count">{count}</span>
     </button>
   {/each}
@@ -92,11 +91,11 @@
 
   .slot {
     position: relative;
-    display: grid;
-    grid-template-columns: 28px 1fr auto;
+    display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 8px 12px;
+    justify-content: center;
+    gap: 10px;
+    padding: 12px 14px;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
@@ -127,14 +126,16 @@
 
   .icon-wrap {
     position: relative;
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
     display: grid;
     place-items: center;
   }
 
   .slot i {
     color: var(--accent);
+    font-size: 24px;
+    line-height: 1;
   }
 
   .slot:not(.available) i {
@@ -159,15 +160,18 @@
     pointer-events: none;
   }
 
-  .lbl {
-    font-size: 13px;
-    font-weight: 500;
-  }
-
   .count {
-    font-weight: 700;
+    font-size: 18px;
+    font-weight: 800;
     font-variant-numeric: tabular-nums;
     color: var(--text);
+    min-width: 1.2em;
+    text-align: left;
+  }
+
+  .slot:not(.available) .count {
+    color: var(--text-muted);
+    opacity: 0.5;
   }
 
   .hint {
