@@ -23,6 +23,7 @@
   import DonateModal from './lib/ui/DonateModal.svelte';
   import NewGameWizard from './lib/ui/NewGameWizard.svelte';
   import PauseOverlay from './lib/ui/PauseOverlay.svelte';
+  import MainMenu from './lib/ui/MainMenu.svelte';
   import DragGhost from './lib/ui/DragGhost.svelte';
   import ToastStack from './lib/ui/ToastStack.svelte';
   import FxOverlay from './lib/ui/FxOverlay.svelte';
@@ -43,7 +44,6 @@
   let showStats = $state(false);
   let showAchievements = $state(false);
   let showReplays = $state(false);
-  let showResume = $state(false);
   let showWizard = $state(false);
   let modeHint = $state<GameMode | null>(null);
   let showLevelPicker = $state(false);
@@ -55,19 +55,36 @@
   async function applyRouteAction() {
     const r = router.route;
     if (r.kind === 'mode') {
+      // Bereits laufende Partie im selben Modus nicht ueberschreiben
+      const sizeOk = !r.size || settings.value.boardSize === r.size;
+      if (
+        game.state.mode === r.mode &&
+        game.state.status === 'running' &&
+        game.state.movesCount > 0 &&
+        sizeOk
+      ) {
+        return;
+      }
       if (r.size) await settings.update({ boardSize: r.size });
-      void game.startNew(r.mode);
+      await game.startNew(r.mode);
       maybeShowModeHint(r.mode);
     } else if (r.kind === 'level') {
-      void game.startNew('level', undefined, r.id);
+      if (
+        game.state.mode === 'level' &&
+        game.state.levelId === r.id &&
+        game.state.status === 'running'
+      ) {
+        return;
+      }
+      await game.startNew('level', undefined, r.id);
       maybeShowModeHint('level');
     } else if (r.kind === 'seed') {
       if (r.size) await settings.update({ boardSize: r.size });
-      void game.startNew('endless', r.seed);
+      await game.startNew('endless', r.seed);
     } else if (r.kind === 'replay') {
       const replay: Replay = { mode: r.mode, seed: r.seed, moves: r.moves };
       const replayed = newFromReplay(replay);
-      void game.startNew(replayed.mode, replayed.seed);
+      await game.startNew(replayed.mode, replayed.seed);
     }
   }
 
@@ -108,10 +125,6 @@
       return;
     }
 
-    if (r.kind === 'home' && game.resumePrompt) {
-      showResume = true;
-    }
-
     if (!localStorage.getItem(TUTORIAL_KEY)) {
       showTutorial = true;
       router.navigate({ kind: 'help' }, { replace: true });
@@ -132,16 +145,6 @@
     router.navigate({ kind: 'help' });
   }
 
-  function resumeSavedGame() {
-    game.resume();
-    showResume = false;
-  }
-
-  function startFreshGame() {
-    void game.startNew('endless');
-    showResume = false;
-  }
-
   function closeOverlay() {
     const r = router.route;
     if (
@@ -153,7 +156,13 @@
       r.kind === 'levels' ||
       r.kind === 'donate'
     ) {
-      router.navigate({ kind: 'mode', mode: game.state.mode });
+      // Wenn eine Partie laeuft, zurueck zum Brett
+      // Sonst zurueck zum Hauptmenue
+      if (game.state.status === 'running' && game.state.movesCount > 0) {
+        router.navigate({ kind: 'mode', mode: game.state.mode });
+      } else {
+        router.navigate({ kind: 'home' });
+      }
     }
   }
 
@@ -271,10 +280,10 @@
       showStats ||
       showAchievements ||
       showReplays ||
-      showResume ||
       showDonate ||
       showLevelPicker ||
-      showTutorial
+      showTutorial ||
+      showSurrenderConfirm
     ) {
       return;
     }
@@ -388,23 +397,27 @@
 
 <svelte:window onkeydown={handleGlobalKey} />
 
-<main>
-  <aside class="side left">
-    <SidebarAchievements />
-  </aside>
+<main class:home={router.route.kind === 'home'}>
+  {#if router.route.kind === 'home'}
+    <MainMenu onStartNew={() => (showWizard = true)} />
+  {:else}
+    <aside class="side left">
+      <SidebarAchievements />
+    </aside>
 
-  <section class="center">
-    <ScoreBar />
-    <div class="board-wrap">
-      <Board boardElement={(el) => (boardEl = el)} />
-    </div>
-    <PiecePool onPickup={handlePickup} />
-    <SpecialsBar />
-  </section>
+    <section class="center">
+      <ScoreBar />
+      <div class="board-wrap">
+        <Board boardElement={(el) => (boardEl = el)} />
+      </div>
+      <PiecePool onPickup={handlePickup} />
+      <SpecialsBar />
+    </section>
 
-  <aside class="side right">
-    <SidebarReplays />
-  </aside>
+    <aside class="side right">
+      <SidebarReplays />
+    </aside>
+  {/if}
 </main>
 
 <DragGhost cellSize={cellSize} gap={cellGap} />
@@ -454,14 +467,6 @@
     showWizard = true;
   }}
 />
-
-<Modal open={showResume} title="Partie fortsetzen?" closeOnBackdrop={false}>
-  <p>Es liegt eine laufende Endless-Partie vor. Moechtest du fortsetzen oder neu beginnen?</p>
-  {#snippet footer()}
-    <button class="ghost" onclick={startFreshGame}>Neu starten</button>
-    <button class="primary" onclick={resumeSavedGame}>Fortsetzen</button>
-  {/snippet}
-</Modal>
 
 <Modal
   open={showSurrenderConfirm}
@@ -611,6 +616,13 @@
     padding: 16px;
     width: min(560px, 100%);
     margin: 0 auto;
+  }
+
+  main.home {
+    grid-template-columns: 1fr;
+    width: 100%;
+    padding: 0;
+    place-items: start center;
   }
 
   .side {

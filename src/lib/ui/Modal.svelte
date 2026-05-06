@@ -16,7 +16,12 @@
   }
 
   function handleKey(event: KeyboardEvent) {
-    if (event.key === 'Escape' && onClose) onClose();
+    if (!open) return;
+    if (event.key === 'Escape' && onClose) {
+      event.preventDefault();
+      event.stopPropagation();
+      onClose();
+    }
   }
 </script>
 
