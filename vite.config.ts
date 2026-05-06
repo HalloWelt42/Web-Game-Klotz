@@ -33,6 +33,8 @@ export default defineConfig({
       workbox: {
         navigateFallback: `${base}index.html`,
         navigateFallbackDenylist: [/^\/api\//],
+        clientsClaim: true,
+        skipWaiting: true,
       },
       manifest: {
         name: 'Klotz',
