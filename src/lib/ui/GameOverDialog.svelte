@@ -1,6 +1,7 @@
 <script lang="ts">
   import { game } from '../stores/game.svelte';
   import { MODES } from '../game/modes';
+  import { withBase } from '../router.svelte';
   import Modal from './Modal.svelte';
 
   const open = $derived(game.state.status === 'gameover' || game.state.status === 'won');
@@ -21,7 +22,8 @@
     const moves = r.moves
       .map((m) => `${m.slot}:${m.pieceId}:${m.x}:${m.y}`)
       .join(',');
-    return `${window.location.origin}/replay/${r.mode}/${r.seed}/${encodeURIComponent(moves)}`;
+    const path = withBase(`/replay/${r.mode}/${r.seed}/${encodeURIComponent(moves)}`);
+    return `${window.location.origin}${path}`;
   }
 
   async function shareReplay() {

@@ -21,6 +21,7 @@
   import LevelPicker from './lib/ui/LevelPicker.svelte';
   import ModeHint from './lib/ui/ModeHint.svelte';
   import Modal from './lib/ui/Modal.svelte';
+  import DonateModal from './lib/ui/DonateModal.svelte';
   import DragGhost from './lib/ui/DragGhost.svelte';
   import ToastStack from './lib/ui/ToastStack.svelte';
   import FxOverlay from './lib/ui/FxOverlay.svelte';
@@ -45,6 +46,7 @@
   let showModePicker = $state(false);
   let modeHint = $state<GameMode | null>(null);
   let showLevelPicker = $state(false);
+  let showDonate = $state(false);
 
   let initialised = $state(false);
 
@@ -84,6 +86,7 @@
     showSettings = r.kind === 'settings';
     showTutorial = r.kind === 'help';
     showLevelPicker = r.kind === 'levels';
+    showDonate = r.kind === 'donate';
     if (initialised && (r.kind === 'mode' || r.kind === 'level' || r.kind === 'seed' || r.kind === 'replay')) {
       void applyRouteAction();
     }
@@ -145,13 +148,16 @@
       r.kind === 'replays' ||
       r.kind === 'settings' ||
       r.kind === 'help' ||
-      r.kind === 'levels'
+      r.kind === 'levels' ||
+      r.kind === 'donate'
     ) {
       router.navigate({ kind: 'mode', mode: game.state.mode });
     }
   }
 
-  function openOverlay(kind: 'stats' | 'achievements' | 'replays' | 'settings' | 'levels') {
+  function openOverlay(
+    kind: 'stats' | 'achievements' | 'replays' | 'settings' | 'levels' | 'donate',
+  ) {
     router.navigate({ kind });
   }
 
@@ -320,6 +326,14 @@
       <i class="fa-solid fa-chart-simple"></i>
     </button>
     <button
+      class="ghost donate-btn"
+      title="Danke sagen / Spende"
+      aria-label="Danke sagen"
+      onclick={() => openOverlay('donate')}
+    >
+      <i class="fa-solid fa-heart"></i>
+    </button>
+    <button
       class="ghost"
       title="Einstellungen"
       aria-label="Einstellungen"
@@ -388,6 +402,8 @@
   onClose={closeOverlay}
   onPick={pickLevel}
 />
+
+<DonateModal open={showDonate} onClose={closeOverlay} />
 
 <Modal open={showResume} title="Partie fortsetzen?" closeOnBackdrop={false}>
   <p>Es liegt eine laufende Endless-Partie vor. Moechtest du fortsetzen oder neu beginnen?</p>
@@ -472,6 +488,14 @@
 
   .actions button {
     padding: 8px 10px;
+  }
+
+  .donate-btn i {
+    color: #ff4d6d;
+  }
+
+  .donate-btn:hover i {
+    text-shadow: 0 0 10px rgba(255, 77, 109, 0.5);
   }
 
 

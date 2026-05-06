@@ -1,15 +1,37 @@
-import { defineConfig } from 'vitest/config'
+import { defineConfig, type Plugin } from 'vitest/config'
 import { svelte } from '@sveltejs/vite-plugin-svelte'
 import { VitePWA } from 'vite-plugin-pwa'
+import { copyFileSync, existsSync } from 'node:fs'
+import { resolve } from 'node:path'
+
+const base = process.env.KLOTZ_BASE ?? '/Web-Game-Klotz/'
+
+// SPA-Fallback fuer GitHub Pages: 404.html = Kopie von index.html
+function copy404(): Plugin {
+  return {
+    name: 'klotz-copy-404',
+    apply: 'build',
+    closeBundle() {
+      const dist = resolve(process.cwd(), 'dist')
+      const src = resolve(dist, 'index.html')
+      const dest = resolve(dist, '404.html')
+      if (existsSync(src)) {
+        copyFileSync(src, dest)
+      }
+    },
+  }
+}
 
 export default defineConfig({
+  base,
   plugins: [
     svelte(),
+    copy404(),
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg'],
       workbox: {
-        navigateFallback: '/index.html',
+        navigateFallback: `${base}index.html`,
         navigateFallbackDenylist: [/^\/api\//],
       },
       manifest: {
@@ -21,10 +43,11 @@ export default defineConfig({
         display: 'standalone',
         orientation: 'portrait',
         lang: 'de',
-        start_url: '/',
+        scope: base,
+        start_url: base,
         icons: [
           {
-            src: '/icons/icon.svg',
+            src: `${base}icons/icon.svg`,
             sizes: 'any',
             type: 'image/svg+xml',
             purpose: 'any maskable',

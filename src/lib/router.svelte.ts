@@ -2,6 +2,26 @@ import { LEVELS } from './game/levels';
 import type { BoardSize, GameMode, ReplayMove } from './game/types';
 import { pieceById } from './game/pieces';
 
+const RAW_BASE =
+  typeof import.meta !== 'undefined'
+    ? (import.meta as unknown as { env?: { BASE_URL?: string } }).env?.BASE_URL ?? '/'
+    : '/';
+export const BASE_PATH = RAW_BASE.endsWith('/') ? RAW_BASE : `${RAW_BASE}/`;
+
+export function withBase(path: string): string {
+  const clean = path.startsWith('/') ? path.slice(1) : path;
+  return BASE_PATH + clean;
+}
+
+function stripBase(pathname: string): string {
+  if (BASE_PATH === '/') return pathname;
+  if (pathname.startsWith(BASE_PATH)) {
+    const rest = pathname.slice(BASE_PATH.length);
+    return rest.startsWith('/') ? rest : `/${rest}`;
+  }
+  return pathname;
+}
+
 export type Route =
   | { kind: 'home' }
   | { kind: 'mode'; mode: GameMode; size?: BoardSize }
@@ -13,7 +33,8 @@ export type Route =
   | { kind: 'achievements' }
   | { kind: 'replays' }
   | { kind: 'settings' }
-  | { kind: 'help' };
+  | { kind: 'help' }
+  | { kind: 'donate' };
 
 const VALID_SIZES: BoardSize[] = [6, 8, 10, 12];
 
@@ -51,7 +72,8 @@ function parseSeedString(raw: string): number {
 }
 
 export function parseRoute(pathname: string): Route {
-  const path = pathname.replace(/\/+$/, '') || '/';
+  const stripped = stripBase(pathname);
+  const path = stripped.replace(/\/+$/, '') || '/';
   if (path === '/' || path === '') return { kind: 'home' };
   if (path === '/levels') return { kind: 'levels' };
   if (path === '/stats') return { kind: 'stats' };
@@ -59,6 +81,7 @@ export function parseRoute(pathname: string): Route {
   if (path === '/replays') return { kind: 'replays' };
   if (path === '/settings') return { kind: 'settings' };
   if (path === '/help') return { kind: 'help' };
+  if (path === '/danke' || path === '/donate') return { kind: 'donate' };
 
   if (path in PATH_TO_MODE) {
     return { kind: 'mode', mode: PATH_TO_MODE[path] };
@@ -144,6 +167,8 @@ export function routeToPath(route: Route): string {
       return '/settings';
     case 'help':
       return '/help';
+    case 'donate':
+      return '/danke';
   }
 }
 
@@ -162,17 +187,18 @@ function createRouter() {
   }
 
   function navigate(target: Route, opts: { replace?: boolean } = {}) {
-    const path = routeToPath(target);
-    if (path === pathname) {
+    const logicalPath = routeToPath(target);
+    const fullPath = withBase(logicalPath);
+    if (fullPath === pathname) {
       route = target;
       return;
     }
     if (opts.replace) {
-      window.history.replaceState({}, '', path);
+      window.history.replaceState({}, '', fullPath);
     } else {
-      window.history.pushState({}, '', path);
+      window.history.pushState({}, '', fullPath);
     }
-    pathname = path;
+    pathname = fullPath;
     route = target;
   }
 

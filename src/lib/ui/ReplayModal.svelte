@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import { loadReplays } from '../game/persistence';
   import { MODES } from '../game/modes';
+  import { withBase } from '../router.svelte';
   import type { Replay } from '../game/types';
   import Modal from './Modal.svelte';
 
@@ -24,7 +25,8 @@
     const moves = r.moves
       .map((m) => `${m.slot}:${m.pieceId}:${m.x}:${m.y}`)
       .join(',');
-    return `${window.location.origin}/replay/${r.mode}/${r.seed}/${encodeURIComponent(moves)}`;
+    const path = withBase(`/replay/${r.mode}/${r.seed}/${encodeURIComponent(moves)}`);
+    return `${window.location.origin}${path}`;
   }
 
   async function copyUrl(r: Replay) {
