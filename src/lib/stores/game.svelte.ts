@@ -416,6 +416,12 @@ function createGameStore() {
       if (state.status !== 'running') return;
       paused = !paused;
     },
+    surrender() {
+      if (state.status !== 'running') return;
+      paused = false;
+      state = { ...state, status: 'gameover' };
+      void handleGameEnd();
+    },
     init,
     reloadHighscoreFor,
     startNew,

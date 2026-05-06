@@ -116,19 +116,29 @@
   --bg-soft: #d6ecff;
   --surface: #ffffff;
   --surface-strong: #ddedff;
+  --text: #0c2f4a;
+  --text-muted: #4a6c87;
+  --border: #93c2e3;
   --board-bg: #b3d4f0;
   --cell-empty: #ecf6ff;
   --cell-empty-edge: #b3d4f0;
+  --cell-preview-ok: rgba(2, 132, 199, 0.4);
+  --cell-preview-bad: rgba(244, 63, 94, 0.45);
+  --cell-clear-hint: rgba(250, 204, 21, 0.45);
   --accent: #0284c7;
   --accent-strong: #0369a1;
-  --piece-red: #ff7373;
-  --piece-orange: #ffa14a;
-  --piece-yellow: #ffe066;
-  --piece-green: #4dd2ff;
-  --piece-teal: #1cc6ff;
-  --piece-blue: #2563eb;
-  --piece-purple: #8a85ff;
-  --piece-pink: #c389ff;
+  --danger: #b91c1c;
+  --success: #15803d;
+  --piece-glow-strength: 0;
+  --piece-red: #e11d48;
+  --piece-orange: #ea580c;
+  --piece-yellow: #d97706;
+  --piece-green: #0891b2;
+  --piece-teal: #0e7490;
+  --piece-blue: #1d4ed8;
+  --piece-purple: #6d28d9;
+  --piece-pink: #be185d;
+  --piece-special: #be185d;
 }
 
 [data-palette='halloween'] {

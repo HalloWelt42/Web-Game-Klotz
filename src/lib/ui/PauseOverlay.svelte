@@ -47,6 +47,10 @@
           <i class="fa-solid fa-shapes"></i>
           Neue Partie
         </button>
+        <button class="ghost" type="button" onclick={() => game.surrender()}>
+          <i class="fa-solid fa-flag"></i>
+          Partie beenden
+        </button>
         <button class="ghost" type="button" onclick={home}>
           <i class="fa-solid fa-house"></i>
           Hauptansicht
