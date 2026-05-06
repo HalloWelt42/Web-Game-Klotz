@@ -221,7 +221,10 @@ function shrinkIfNeeded(state: GameState): GameState {
   if (targetRing === 0) return state;
   const obs: ObstacleMap = cloneObstacles(state.obstacles);
   const size = state.boardSize;
-  const ring = Math.min(targetRing, Math.floor(size / 2));
+  // Innen muss immer mindestens 4x4 frei bleiben, damit der Spieler
+  // weiter agieren kann -- sonst wird die Partie auswegslos.
+  const ringCap = Math.max(0, Math.floor((size - 4) / 2));
+  const ring = Math.min(targetRing, ringCap);
   for (let r = 0; r < ring; r++) {
     for (let i = r; i < size - r; i++) {
       obs[obstacleKey(i, r)] = 'block';
