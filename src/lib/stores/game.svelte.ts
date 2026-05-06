@@ -119,6 +119,7 @@ function createGameStore() {
     state = resumePrompt;
     resumePrompt = null;
     gameEndHandled = false;
+    gameEndDismissed = false;
     drag = { active: false };
     paused = false;
     pendingSpecial = null;
@@ -440,6 +441,11 @@ function createGameStore() {
     surrender() {
       if (state.status !== 'running') return;
       paused = false;
+      drag = { active: false };
+      pendingSpecial = null;
+      // Sicherstellen, dass das End-Modal angezeigt wird, falls es
+      // im vorherigen Spiel weggeklickt war
+      gameEndDismissed = false;
       state = { ...state, status: 'gameover' };
       void handleGameEnd();
     },
