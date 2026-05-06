@@ -1,0 +1,170 @@
+:root {
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 18px;
+
+  --gap-cell: 4px;
+  --gap-section: 16px;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
+  --shadow-lg: 0 12px 48px rgba(0, 0, 0, 0.32);
+
+  --transition-fast: 120ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  --transition-medium: 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  --bg: #f6f7fb;
+  --bg-soft: #eceef4;
+  --surface: #ffffff;
+  --surface-strong: #f0f1f6;
+  --text: #1a1d24;
+  --text-muted: #5a6172;
+  --border: #d8dbe5;
+
+  --board-bg: #c8cfdc;
+  --cell-empty: #e3e7f0;
+  --cell-empty-edge: #b9c0cf;
+  --cell-preview-ok: rgba(96, 165, 250, 0.55);
+  --cell-preview-bad: rgba(244, 63, 94, 0.5);
+  --cell-clear-hint: rgba(250, 204, 21, 0.5);
+
+  --accent: #6366f1;
+  --accent-strong: #4f46e5;
+  --danger: #e11d48;
+  --success: #16a34a;
+
+  --piece-glow-strength: 0;
+
+  --piece-red: #ff2737;
+  --piece-orange: #ff7600;
+  --piece-yellow: #ffc500;
+  --piece-green: #00d853;
+  --piece-teal: #00cfe5;
+  --piece-blue: #2c5cff;
+  --piece-purple: #9b2bff;
+  --piece-pink: #ff2891;
+  --piece-special: #ff36ad;
+}
+
+[data-theme='dark'] {
+  --bg: #0b1224;
+  --bg-soft: #111a2f;
+  --surface: #182238;
+  --surface-strong: #1f2a44;
+  --text: #e8edf7;
+  --text-muted: #94a3b8;
+  --border: #2c3a59;
+
+  --board-bg: #0d1426;
+  --cell-empty: #16213b;
+  --cell-empty-edge: #243355;
+  --cell-preview-ok: rgba(96, 165, 250, 0.6);
+  --cell-preview-bad: rgba(244, 63, 94, 0.6);
+  --cell-clear-hint: rgba(250, 204, 21, 0.55);
+
+  --accent: #818cf8;
+  --accent-strong: #a5b4fc;
+
+  --piece-glow-strength: 0.65;
+
+  --piece-red: #ff3344;
+  --piece-orange: #ff8a14;
+  --piece-yellow: #ffd11f;
+  --piece-green: #1bdf63;
+  --piece-teal: #1cd9ed;
+  --piece-blue: #4978ff;
+  --piece-purple: #a648ff;
+  --piece-pink: #ff3aa0;
+  --piece-special: #ff5cc1;
+}
+
+[data-palette='warm'] {
+  --piece-red: #ff3b3b;
+  --piece-orange: #ff7a00;
+  --piece-yellow: #ffd000;
+  --piece-green: #c4d600;
+  --piece-teal: #ff9966;
+  --piece-blue: #ff5757;
+  --piece-purple: #ff5da2;
+  --piece-pink: #ff3d7f;
+}
+
+[data-palette='cool'] {
+  --piece-red: #6e8cff;
+  --piece-orange: #1ea7ff;
+  --piece-yellow: #16d6c1;
+  --piece-green: #22c1c3;
+  --piece-teal: #0fbfdf;
+  --piece-blue: #2745d9;
+  --piece-purple: #7c3aed;
+  --piece-pink: #5269ff;
+}
+
+[data-palette='forest'] {
+  --piece-red: #d97706;
+  --piece-orange: #b45309;
+  --piece-yellow: #a16207;
+  --piece-green: #16a34a;
+  --piece-teal: #0d9488;
+  --piece-blue: #047857;
+  --piece-purple: #166534;
+  --piece-pink: #78350f;
+}
+
+[data-palette='winter'] {
+  --bg: #e6f4ff;
+  --bg-soft: #d6ecff;
+  --surface: #ffffff;
+  --surface-strong: #ddedff;
+  --board-bg: #b3d4f0;
+  --cell-empty: #ecf6ff;
+  --cell-empty-edge: #b3d4f0;
+  --accent: #0284c7;
+  --accent-strong: #0369a1;
+  --piece-red: #ff7373;
+  --piece-orange: #ffa14a;
+  --piece-yellow: #ffe066;
+  --piece-green: #4dd2ff;
+  --piece-teal: #1cc6ff;
+  --piece-blue: #2563eb;
+  --piece-purple: #8a85ff;
+  --piece-pink: #c389ff;
+}
+
+[data-palette='halloween'] {
+  --bg: #0f0d12;
+  --bg-soft: #1a1620;
+  --surface: #1a1620;
+  --surface-strong: #261d2f;
+  --text: #ffe6a3;
+  --text-muted: #b8a394;
+  --border: #4a3658;
+  --board-bg: #150f1c;
+  --cell-empty: #211727;
+  --cell-empty-edge: #3b2d4a;
+  --accent: #ff7a00;
+  --accent-strong: #ff5500;
+  --piece-glow-strength: 0.7;
+  --piece-red: #ff3a3a;
+  --piece-orange: #ff7a00;
+  --piece-yellow: #ffd400;
+  --piece-green: #6acd00;
+  --piece-teal: #00d8a0;
+  --piece-blue: #8e2bff;
+  --piece-purple: #c026d3;
+  --piece-pink: #ff2d8f;
+}
+
+[data-palette='winter'] body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.7) 1px, transparent 2px),
+    radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.7) 1px, transparent 2px),
+    radial-gradient(circle at 50% 10%, rgba(255, 255, 255, 0.7) 1px, transparent 2px),
+    radial-gradient(circle at 10% 90%, rgba(255, 255, 255, 0.7) 1px, transparent 2px);
+  background-size: 200px 200px;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.5;
+}

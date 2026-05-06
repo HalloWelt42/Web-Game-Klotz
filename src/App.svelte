@@ -1,0 +1,526 @@
+<script lang="ts">
+  import './lib/styles/global.css';
+
+  import { onMount, untrack } from 'svelte';
+  import { game } from './lib/stores/game.svelte';
+  import { settings } from './lib/stores/settings.svelte';
+  import { stats } from './lib/stores/stats.svelte';
+  import Board from './lib/ui/Board.svelte';
+  import PiecePool from './lib/ui/PiecePool.svelte';
+  import SpecialsBar from './lib/ui/SpecialsBar.svelte';
+  import SidebarAchievements from './lib/ui/SidebarAchievements.svelte';
+  import SidebarReplays from './lib/ui/SidebarReplays.svelte';
+  import ScoreBar from './lib/ui/ScoreBar.svelte';
+  import GameOverDialog from './lib/ui/GameOverDialog.svelte';
+  import TutorialOverlay from './lib/ui/TutorialOverlay.svelte';
+  import SettingsModal from './lib/ui/Settings.svelte';
+  import StatsModal from './lib/ui/Stats.svelte';
+  import AchievementsModal from './lib/ui/AchievementsModal.svelte';
+  import ReplayModal from './lib/ui/ReplayModal.svelte';
+  import ModePicker from './lib/ui/ModePicker.svelte';
+  import LevelPicker from './lib/ui/LevelPicker.svelte';
+  import ModeHint from './lib/ui/ModeHint.svelte';
+  import Modal from './lib/ui/Modal.svelte';
+  import DragGhost from './lib/ui/DragGhost.svelte';
+  import ToastStack from './lib/ui/ToastStack.svelte';
+  import FxOverlay from './lib/ui/FxOverlay.svelte';
+  import { canUndo } from './lib/game/engine';
+  import type { GameMode } from './lib/game/types';
+  import { newFromReplay } from './lib/game/engine';
+  import type { Replay } from './lib/game/types';
+  import { router, routeToPath } from './lib/router.svelte';
+
+  const TUTORIAL_KEY = 'klotz:tutorial-shown';
+
+  let boardEl = $state<HTMLDivElement | null>(null);
+  let cellSize = $state(36);
+  const cellGap = 4;
+
+  let showTutorial = $state(false);
+  let showSettings = $state(false);
+  let showStats = $state(false);
+  let showAchievements = $state(false);
+  let showReplays = $state(false);
+  let showResume = $state(false);
+  let showModePicker = $state(false);
+  let modeHint = $state<GameMode | null>(null);
+  let showLevelPicker = $state(false);
+
+  let initialised = $state(false);
+
+  async function applyRouteAction() {
+    const r = router.route;
+    if (r.kind === 'mode') {
+      if (r.size) await settings.update({ boardSize: r.size });
+      void game.startNew(r.mode);
+      maybeShowModeHint(r.mode);
+    } else if (r.kind === 'level') {
+      void game.startNew('level', undefined, r.id);
+      maybeShowModeHint('level');
+    } else if (r.kind === 'seed') {
+      if (r.size) await settings.update({ boardSize: r.size });
+      void game.startNew('endless', r.seed);
+    } else if (r.kind === 'replay') {
+      const replay: Replay = { mode: r.mode, seed: r.seed, moves: r.moves };
+      const replayed = newFromReplay(replay);
+      void game.startNew(replayed.mode, replayed.seed);
+    }
+  }
+
+  function maybeShowModeHint(mode: GameMode) {
+    if (!settings.value.modeHintsShown.includes(mode)) {
+      modeHint = mode;
+      void settings.update({
+        modeHintsShown: [...settings.value.modeHintsShown, mode],
+      });
+    }
+  }
+
+  $effect(() => {
+    const r = router.route;
+    showStats = r.kind === 'stats';
+    showAchievements = r.kind === 'achievements';
+    showReplays = r.kind === 'replays';
+    showSettings = r.kind === 'settings';
+    showTutorial = r.kind === 'help';
+    showLevelPicker = r.kind === 'levels';
+    if (initialised && (r.kind === 'mode' || r.kind === 'level' || r.kind === 'seed' || r.kind === 'replay')) {
+      void applyRouteAction();
+    }
+  });
+
+  onMount(async () => {
+    router.init();
+    await Promise.all([settings.init(), stats.init(), game.init()]);
+
+    const r = router.route;
+    if (r.kind === 'replay' || r.kind === 'seed' || r.kind === 'mode' || r.kind === 'level') {
+      await applyRouteAction();
+      if (r.kind === 'replay') {
+        router.navigate({ kind: 'mode', mode: r.mode }, { replace: true });
+      }
+      initialised = true;
+      return;
+    }
+
+    if (r.kind === 'home' && game.resumePrompt) {
+      showResume = true;
+    }
+
+    if (!localStorage.getItem(TUTORIAL_KEY)) {
+      showTutorial = true;
+      router.navigate({ kind: 'help' }, { replace: true });
+    }
+    initialised = true;
+  });
+
+  function closeTutorial() {
+    try {
+      localStorage.setItem(TUTORIAL_KEY, '1');
+    } catch {
+      /* ignore */
+    }
+    closeOverlay();
+  }
+
+  function showTutorialAgain() {
+    router.navigate({ kind: 'help' });
+  }
+
+  function resumeSavedGame() {
+    game.resume();
+    showResume = false;
+  }
+
+  function startFreshGame() {
+    void game.startNew('endless');
+    showResume = false;
+  }
+
+  function closeOverlay() {
+    const r = router.route;
+    if (
+      r.kind === 'stats' ||
+      r.kind === 'achievements' ||
+      r.kind === 'replays' ||
+      r.kind === 'settings' ||
+      r.kind === 'help' ||
+      r.kind === 'levels'
+    ) {
+      router.navigate({ kind: 'mode', mode: game.state.mode });
+    }
+  }
+
+  function openOverlay(kind: 'stats' | 'achievements' | 'replays' | 'settings' | 'levels') {
+    router.navigate({ kind });
+  }
+
+  function pickMode(mode: GameMode) {
+    if (mode === 'level') {
+      router.navigate({ kind: 'levels' });
+      return;
+    }
+    router.navigate({ kind: 'mode', mode });
+  }
+
+  function pickLevel(levelId: string) {
+    router.navigate({ kind: 'level', id: levelId });
+  }
+
+  function startCustomSeed(seed: number, raw: string) {
+    router.navigate({ kind: 'seed', seed, raw });
+  }
+
+  $effect(() => {
+    const theme = settings.value.theme;
+    let resolved: 'light' | 'dark' = theme === 'system' ? 'light' : theme;
+    if (theme === 'system' && typeof window !== 'undefined') {
+      resolved = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    document.documentElement.dataset.theme = resolved;
+    document.documentElement.dataset.palette = settings.value.palette;
+  });
+
+  $effect(() => {
+    if (!boardEl) return;
+    const measure = () => {
+      const rect = boardEl!.getBoundingClientRect();
+      const totalGap = (game.state.boardSize - 1) * cellGap;
+      const padding = 20;
+      cellSize = Math.max(20, Math.floor((rect.width - padding - totalGap) / game.state.boardSize));
+      game.setBoardCenter(rect.left + rect.width / 2, rect.top + rect.height / 2);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(boardEl);
+    window.addEventListener('resize', measure);
+    window.addEventListener('scroll', measure, true);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', measure);
+      window.removeEventListener('scroll', measure, true);
+    };
+  });
+
+  $effect(() => {
+    if (!game.drag.active) return;
+
+    function updateFromPointer(clientX: number, clientY: number) {
+      const target = document.elementFromPoint(clientX, clientY) as HTMLElement | null;
+      let hover: { x: number; y: number } | null = null;
+      if (
+        target &&
+        target.classList.contains('cell') &&
+        target.dataset.x !== undefined &&
+        target.dataset.y !== undefined
+      ) {
+        const cx = parseInt(target.dataset.x, 10);
+        const cy = parseInt(target.dataset.y, 10);
+        if (game.drag.active) {
+          hover = { x: cx - game.drag.anchor.x, y: cy - game.drag.anchor.y };
+        }
+      }
+      game.updateDrag({ x: clientX, y: clientY }, hover);
+    }
+
+    function onMove(e: PointerEvent) {
+      updateFromPointer(e.clientX, e.clientY);
+    }
+
+    function onUp(e: PointerEvent) {
+      updateFromPointer(e.clientX, e.clientY);
+      game.endDrag();
+    }
+
+    function onCancel() {
+      game.cancelDrag();
+    }
+
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+    window.addEventListener('pointercancel', onCancel);
+
+    return () => {
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+      window.removeEventListener('pointercancel', onCancel);
+    };
+  });
+
+  $effect(() => {
+    if (game.state.timeLimit === undefined) return;
+    if (game.state.status !== 'running') return;
+    const handle = setInterval(() => game.tickTime(1), 1000);
+    return () => clearInterval(handle);
+  });
+
+  function handlePickup(event: {
+    slotIndex: 0 | 1 | 2;
+    pointer: { x: number; y: number };
+    anchor: { x: number; y: number };
+  }) {
+    game.startDrag(event.slotIndex, event.pointer, event.anchor);
+  }
+</script>
+
+<header class="topbar">
+  <div class="title">
+    <i class="fa-solid fa-cubes"></i>
+    <span>Klotz</span>
+    {#if stats.dailyStreak > 0}
+      <span
+        class="streak"
+        title={`Daily-Streak: ${stats.dailyStreak} Tag${stats.dailyStreak === 1 ? '' : 'e'}`}
+      >
+        <i class="fa-solid fa-fire"></i>
+        <span>{stats.dailyStreak}</span>
+      </span>
+    {/if}
+  </div>
+  <div class="actions">
+    <button
+      class="ghost"
+      title="Letzten Zug rueckgaengig"
+      aria-label="Letzten Zug rueckgaengig"
+      disabled={!canUndo(game.state)}
+      onclick={() => game.performUndo()}
+    >
+      <i class="fa-solid fa-arrow-rotate-left"></i>
+    </button>
+    <button
+      class="ghost new-game"
+      title="Neue Partie / Modus waehlen"
+      aria-label="Neue Partie"
+      onclick={() => (showModePicker = true)}
+    >
+      <i class="fa-solid fa-shapes"></i>
+    </button>
+    <button
+      class="ghost"
+      title="Erfolge"
+      aria-label="Erfolge"
+      onclick={() => openOverlay('achievements')}
+    >
+      <i class="fa-solid fa-trophy"></i>
+    </button>
+    <button
+      class="ghost"
+      title="Replays"
+      aria-label="Replays"
+      onclick={() => openOverlay('replays')}
+    >
+      <i class="fa-solid fa-share-nodes"></i>
+    </button>
+    <button
+      class="ghost"
+      title="Statistik"
+      aria-label="Statistik"
+      onclick={() => openOverlay('stats')}
+    >
+      <i class="fa-solid fa-chart-simple"></i>
+    </button>
+    <button
+      class="ghost"
+      title="Einstellungen"
+      aria-label="Einstellungen"
+      onclick={() => openOverlay('settings')}
+    >
+      <i class="fa-solid fa-gear"></i>
+    </button>
+  </div>
+</header>
+
+<main>
+  <aside class="side left">
+    <SidebarAchievements />
+  </aside>
+
+  <section class="center">
+    <ScoreBar />
+    <div class="board-wrap">
+      <Board boardElement={(el) => (boardEl = el)} />
+    </div>
+    <PiecePool onPickup={handlePickup} />
+    <SpecialsBar />
+    <div class="hint">
+      Stein anfassen, ziehen, loslassen. Tab + Pfeile + Enter fuer Tastatur.
+    </div>
+  </section>
+
+  <aside class="side right">
+    <SidebarReplays />
+  </aside>
+</main>
+
+<DragGhost cellSize={cellSize} gap={cellGap} />
+
+<ToastStack />
+
+<FxOverlay />
+
+<GameOverDialog />
+
+<TutorialOverlay open={showTutorial} onClose={closeTutorial} />
+
+<SettingsModal
+  open={showSettings}
+  onClose={closeOverlay}
+  onShowTutorial={showTutorialAgain}
+/>
+
+<StatsModal open={showStats} onClose={closeOverlay} />
+
+<AchievementsModal open={showAchievements} onClose={closeOverlay} />
+
+<ReplayModal open={showReplays} onClose={closeOverlay} />
+
+<ModePicker
+  open={showModePicker}
+  onClose={() => (showModePicker = false)}
+  onPick={pickMode}
+  onCustomSeed={startCustomSeed}
+/>
+
+<ModeHint open={modeHint !== null} mode={modeHint} onClose={() => (modeHint = null)} />
+
+<LevelPicker
+  open={showLevelPicker}
+  onClose={closeOverlay}
+  onPick={pickLevel}
+/>
+
+<Modal open={showResume} title="Partie fortsetzen?" closeOnBackdrop={false}>
+  <p>Es liegt eine laufende Endless-Partie vor. Moechtest du fortsetzen oder neu beginnen?</p>
+  {#snippet footer()}
+    <button class="ghost" onclick={startFreshGame}>Neu starten</button>
+    <button class="primary" onclick={resumeSavedGame}>Fortsetzen</button>
+  {/snippet}
+</Modal>
+
+<style>
+  :global(html, body) {
+    background: var(--bg);
+  }
+
+  :global(#app) {
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+    position: relative;
+    z-index: 1;
+  }
+
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--text);
+  }
+
+  .title i {
+    color: var(--accent);
+  }
+
+  .streak {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, rgba(251, 146, 60, 0.18), rgba(239, 68, 68, 0.18));
+    border: 1px solid rgba(251, 146, 60, 0.4);
+    color: #f97316;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .streak i {
+    color: #f97316;
+    animation: streak-flicker 2s ease-in-out infinite;
+  }
+
+  @keyframes streak-flicker {
+    0%,
+    100% {
+      transform: scale(1);
+      filter: brightness(1);
+    }
+    50% {
+      transform: scale(1.08);
+      filter: brightness(1.15);
+    }
+  }
+
+  .actions {
+    display: flex;
+    gap: 4px;
+  }
+
+  .actions button {
+    padding: 8px 10px;
+  }
+
+
+  main {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 16px;
+    width: min(560px, 100%);
+    margin: 0 auto;
+  }
+
+  .side {
+    display: none;
+  }
+
+  .center {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-width: 0;
+  }
+
+  .board-wrap {
+    display: flex;
+    justify-content: center;
+  }
+
+  .hint {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 13px;
+  }
+
+  @media (min-width: 1100px) {
+    main {
+      grid-template-columns: 280px minmax(420px, 560px) 280px;
+      gap: 24px;
+      width: min(1180px, 100%);
+      align-items: start;
+    }
+
+    .side {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      position: sticky;
+      top: 76px;
+    }
+  }
+</style>
