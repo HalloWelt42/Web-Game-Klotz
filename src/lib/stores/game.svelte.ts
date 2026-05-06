@@ -359,7 +359,8 @@ function createGameStore() {
       }
       void persist();
     }
-    pendingSpecial = state.specials[kind] > 0 ? kind : null;
+    // Nach jedem Use zurueck auf neutral -- der User waehlt explizit neu
+    pendingSpecial = null;
     return true;
   }
 

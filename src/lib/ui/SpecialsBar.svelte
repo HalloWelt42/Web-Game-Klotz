@@ -114,20 +114,8 @@
 
   .slot.active {
     border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.32), 0 6px 22px rgba(99, 102, 241, 0.45);
-    background: var(--surface-strong);
-    transform: translateY(-2px);
-  }
-
-  .slot.active::after {
-    content: '';
-    position: absolute;
-    inset: -2px;
-    border-radius: calc(var(--radius-md) + 2px);
-    border: 1px dashed var(--accent);
-    pointer-events: none;
-    animation: dash-rotate 5s linear infinite;
-    opacity: 0.6;
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.4);
+    background: color-mix(in srgb, var(--accent) 12%, var(--surface-strong));
   }
 
   .slot.flashing {
@@ -239,12 +227,4 @@
     }
   }
 
-  @keyframes dash-rotate {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(360deg);
-    }
-  }
 </style>
