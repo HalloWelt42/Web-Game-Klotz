@@ -1,6 +1,7 @@
 import {
   canSkip,
   canUndo,
+  isStuckButRescuable,
   newGame,
   rotatePieceInSlot,
   skip as engineSkip,
@@ -248,6 +249,13 @@ function createGameStore() {
     if (state.status === 'gameover' || state.status === 'won') {
       void handleGameEnd();
     } else {
+      if (isStuckButRescuable(state)) {
+        pushToast({
+          kind: 'achievement',
+          text: 'Pool blockiert -- Special einsetzen!',
+          icon: 'fa-life-ring',
+        });
+      }
       void persist();
     }
     return { placed: true };
@@ -339,7 +347,16 @@ function createGameStore() {
       vibrate(state.combo > 1 ? [25, 30, 25] : 30, settings.value.haptics);
     }
     if (state.status === 'gameover' || state.status === 'won') void handleGameEnd();
-    else void persist();
+    else {
+      if (isStuckButRescuable(state)) {
+        pushToast({
+          kind: 'achievement',
+          text: 'Pool weiter blockiert -- noch ein Special',
+          icon: 'fa-life-ring',
+        });
+      }
+      void persist();
+    }
     pendingSpecial = state.specials[kind] > 0 ? kind : null;
     return true;
   }

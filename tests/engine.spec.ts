@@ -102,6 +102,36 @@ describe('engine.tryPlace', () => {
     expect(out).not.toBeNull();
     expect(out!.state.status).toBe('gameover');
   });
+
+  it('bleibt running wenn Pool blockiert ist aber Specials im Inventar sind', () => {
+    const board = emptyBoard();
+    for (let y = 0; y < 10; y++) {
+      for (let x = 0; x < 10; x++) board[y][x] = '--piece-blue';
+    }
+    for (let y = 0; y < 10; y++) {
+      board[y][y] = null;
+      board[y][(y + 5) % 10] = null;
+    }
+
+    const u1 = pieceById('U1')!;
+    const i3 = pieceById('I3H')!;
+    const baseState = withBoard(
+      withPool(newGame('endless', 1), [
+        { piece: u1, consumed: false },
+        { piece: i3, consumed: false },
+        { piece: i3, consumed: false },
+      ]),
+      board,
+    );
+    // Spieler haette eine Bombe als Rettungsanker
+    const stateWithBomb: GameState = {
+      ...baseState,
+      specials: { bomb: 1, hammer: 0, joker: 0 },
+    };
+    const out = tryPlace(stateWithBomb, 0, 0, 0);
+    expect(out).not.toBeNull();
+    expect(out!.state.status).toBe('running');
+  });
 });
 
 describe('engine.undo', () => {

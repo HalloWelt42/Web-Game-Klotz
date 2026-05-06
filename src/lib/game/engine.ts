@@ -256,6 +256,18 @@ function checkGoalFailed(state: GameState): boolean {
   return false;
 }
 
+export function hasAnySpecial(specials: SpecialInventory): boolean {
+  return specials.bomb > 0 || specials.hammer > 0 || specials.joker > 0;
+}
+
+export function isStuckButRescuable(state: GameState): boolean {
+  if (state.status !== 'running') return false;
+  return (
+    !isAnyPlaceable(state.board, state.pool, state.obstacles) &&
+    hasAnySpecial(state.specials)
+  );
+}
+
 function awardSpecialsForCombo(combo: number, specials: SpecialInventory): SpecialInventory {
   if (combo === 2) return { ...specials, bomb: specials.bomb + 1 };
   if (combo === 3) return { ...specials, hammer: specials.hammer + 1 };
@@ -351,7 +363,10 @@ function applyPlacement(
     next = { ...next, status: 'won' };
   } else if (checkGoalFailed(next)) {
     next = { ...next, status: 'gameover' };
-  } else if (!isAnyPlaceable(next.board, next.pool, next.obstacles)) {
+  } else if (
+    !isAnyPlaceable(next.board, next.pool, next.obstacles) &&
+    !hasAnySpecial(next.specials)
+  ) {
     next = { ...next, status: 'gameover' };
   }
 
@@ -448,7 +463,7 @@ export function skip(state: GameState, slotIndex: 0 | 1 | 2): GameState {
     score: Math.max(0, state.score - SKIP_COST),
     skipUsed: true,
   };
-  if (!isAnyPlaceable(next.board, next.pool, next.obstacles)) {
+  if (!isAnyPlaceable(next.board, next.pool, next.obstacles) && !hasAnySpecial(next.specials)) {
     next = { ...next, status: 'gameover' };
   }
   return next;
