@@ -24,10 +24,10 @@
   import NewGameWizard from './lib/ui/NewGameWizard.svelte';
   import PauseOverlay from './lib/ui/PauseOverlay.svelte';
   import MainMenu from './lib/ui/MainMenu.svelte';
+  import Topbar from './lib/ui/Topbar.svelte';
   import DragGhost from './lib/ui/DragGhost.svelte';
   import ToastStack from './lib/ui/ToastStack.svelte';
   import FxOverlay from './lib/ui/FxOverlay.svelte';
-  import { canUndo } from './lib/game/engine';
   import type { GameMode } from './lib/game/types';
   import { newFromReplay } from './lib/game/engine';
   import type { Replay } from './lib/game/types';
@@ -300,98 +300,15 @@
   }
 </script>
 
-<header class="topbar">
-  <div class="title">
-    <i class="fa-solid fa-cubes"></i>
-    <span>Klotz</span>
-    {#if stats.dailyStreak > 0}
-      <span
-        class="streak"
-        title={`Daily-Streak: ${stats.dailyStreak} Tag${stats.dailyStreak === 1 ? '' : 'e'}`}
-      >
-        <i class="fa-solid fa-fire"></i>
-        <span>{stats.dailyStreak}</span>
-      </span>
-    {/if}
-  </div>
-  <div class="actions">
-    <button
-      class="ghost"
-      title="Letzten Zug rueckgaengig"
-      aria-label="Letzten Zug rueckgaengig"
-      disabled={!canUndo(game.state)}
-      onclick={() => game.performUndo()}
-    >
-      <i class="fa-solid fa-arrow-rotate-left"></i>
-    </button>
-    <button
-      class="ghost"
-      title="Pause (Esc)"
-      aria-label="Pause"
-      disabled={game.state.status !== 'running'}
-      onclick={() => game.togglePause()}
-    >
-      <i class={`fa-solid ${game.paused ? 'fa-play' : 'fa-pause'}`}></i>
-    </button>
-    <button
-      class="ghost"
-      title="Partie beenden"
-      aria-label="Partie beenden"
-      disabled={game.state.status !== 'running'}
-      onclick={() => (showSurrenderConfirm = true)}
-    >
-      <i class="fa-solid fa-flag"></i>
-    </button>
-    <button
-      class="ghost new-game"
-      title="Neue Partie / Modus waehlen"
-      aria-label="Neue Partie"
-      onclick={() => (showWizard = true)}
-    >
-      <i class="fa-solid fa-shapes"></i>
-    </button>
-    <button
-      class="ghost"
-      title="Erfolge"
-      aria-label="Erfolge"
-      onclick={() => openOverlay('achievements')}
-    >
-      <i class="fa-solid fa-trophy"></i>
-    </button>
-    <button
-      class="ghost"
-      title="Replays"
-      aria-label="Replays"
-      onclick={() => openOverlay('replays')}
-    >
-      <i class="fa-solid fa-share-nodes"></i>
-    </button>
-    <button
-      class="ghost"
-      title="Statistik"
-      aria-label="Statistik"
-      onclick={() => openOverlay('stats')}
-    >
-      <i class="fa-solid fa-chart-simple"></i>
-    </button>
-    <button
-      class="ghost donate-btn"
-      title="Danke sagen / Spende"
-      aria-label="Danke sagen"
-      onclick={() => openOverlay('donate')}
-    >
-      <i class="fa-solid fa-heart"></i>
-    </button>
-    <button
-      class="ghost"
-      title="Einstellungen"
-      aria-label="Einstellungen"
-      onclick={() => openOverlay('settings')}
-    >
-      <i class="fa-solid fa-gear"></i>
-    </button>
-  </div>
-</header>
+<Topbar
+  onNewGame={() => (showWizard = true)}
+  onSurrender={() => (showSurrenderConfirm = true)}
+  onOpenAchievements={() => openOverlay('achievements')}
+  onOpenReplays={() => openOverlay('replays')}
+  onOpenStats={() => openOverlay('stats')}
+  onOpenDonate={() => openOverlay('donate')}
+  onOpenSettings={() => openOverlay('settings')}
+/>
 
 <svelte:window onkeydown={handleGlobalKey} />
 
@@ -507,109 +424,6 @@
     z-index: 1;
   }
 
-  .topbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 8px 14px;
-    background: color-mix(in srgb, var(--surface) 85%, transparent);
-    backdrop-filter: blur(14px) saturate(1.2);
-    -webkit-backdrop-filter: blur(14px) saturate(1.2);
-    border-bottom: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
-    position: sticky;
-    top: 0;
-    z-index: 10;
-  }
-
-  .title {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: 700;
-    font-size: 16px;
-    color: var(--text);
-    letter-spacing: 0.02em;
-  }
-
-  .title i {
-    color: var(--accent);
-  }
-
-  .streak {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 2px 8px;
-    border-radius: 999px;
-    background: linear-gradient(135deg, rgba(251, 146, 60, 0.18), rgba(239, 68, 68, 0.18));
-    border: 1px solid rgba(251, 146, 60, 0.4);
-    color: #f97316;
-    font-size: 13px;
-    font-weight: 700;
-  }
-
-  .streak i {
-    color: #f97316;
-    animation: streak-flicker 2s ease-in-out infinite;
-  }
-
-  @keyframes streak-flicker {
-    0%,
-    100% {
-      transform: scale(1);
-      filter: brightness(1);
-    }
-    50% {
-      transform: scale(1.08);
-      filter: brightness(1.15);
-    }
-  }
-
-  .actions {
-    display: flex;
-    gap: 2px;
-  }
-
-  .actions button {
-    padding: 7px 9px;
-    background: transparent;
-    border: 1px solid transparent;
-    border-radius: 8px;
-  }
-
-  .actions button:hover:not(:disabled) {
-    background: var(--surface-strong);
-    border-color: var(--border);
-  }
-
-  .donate-btn i {
-    color: #ff4d6d;
-    animation: heart-pulse 2.4s ease-in-out infinite;
-    text-shadow: 0 0 8px rgba(255, 77, 109, 0.35);
-  }
-
-  .donate-btn:hover i {
-    color: #ff2e57;
-    text-shadow: 0 0 14px rgba(255, 77, 109, 0.8);
-    animation-duration: 0.9s;
-  }
-
-  @keyframes heart-pulse {
-    0%, 100% {
-      transform: scale(1);
-    }
-    25% {
-      transform: scale(1.18);
-    }
-    50% {
-      transform: scale(0.96);
-    }
-    75% {
-      transform: scale(1.08);
-    }
-  }
-
-
   main {
     flex: 1;
     display: grid;
@@ -641,12 +455,6 @@
   .board-wrap {
     display: flex;
     justify-content: center;
-  }
-
-  .hint {
-    text-align: center;
-    color: var(--text-muted);
-    font-size: 13px;
   }
 
   @media (min-width: 1100px) {
