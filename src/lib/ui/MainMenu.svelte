@@ -1,9 +1,10 @@
 <script lang="ts">
   import { game } from '../stores/game.svelte';
   import { stats } from '../stores/stats.svelte';
+  import { settings } from '../stores/settings.svelte';
   import { router } from '../router.svelte';
   import { MODES } from '../game/modes';
-  import type { GameMode } from '../game/types';
+  import type { BoardSize, GameMode } from '../game/types';
 
   type Props = {
     onStartNew: () => void;
@@ -15,6 +16,16 @@
   const lastMode = $derived(game.state.mode);
 
   const modeOrder: GameMode[] = ['endless', 'daily', 'level', 'timed', 'reverse', 'shrink'];
+  const sizes: BoardSize[] = [6, 8, 10, 12];
+  const activeSize = $derived(settings.value.boardSize);
+
+  function pickSize(s: BoardSize) {
+    void settings.update({ boardSize: s });
+  }
+
+  function isFlexible(mode: GameMode): boolean {
+    return mode !== 'level';
+  }
 </script>
 
 <section class="menu">
@@ -45,7 +56,23 @@
   </div>
 
   <section class="modes" aria-label="Spielmodi">
-    <h2>Modi</h2>
+    <header class="modes-head">
+      <h2>Modi</h2>
+      <div class="size-pills" role="radiogroup" aria-label="Brettgröße">
+        {#each sizes as s}
+          <button
+            type="button"
+            role="radio"
+            class="size-pill"
+            class:active={activeSize === s}
+            aria-checked={activeSize === s}
+            onclick={() => pickSize(s)}
+          >
+            {s}
+          </button>
+        {/each}
+      </div>
+    </header>
     <div class="mode-grid">
       {#each modeOrder as id}
         {@const cfg = MODES[id]}
@@ -54,12 +81,15 @@
           class={`mode-tile mode-${id}`}
           onclick={() => {
             if (id === 'level') router.navigate({ kind: 'levels' });
-            else router.navigate({ kind: 'mode', mode: id });
+            else router.navigate({ kind: 'mode', mode: id, size: activeSize });
           }}
           aria-label={cfg.label}
         >
           <i class={`fa-solid ${cfg.icon}`}></i>
           <span>{cfg.label}</span>
+          {#if isFlexible(id)}
+            <span class="size-tag">{activeSize}</span>
+          {/if}
         </button>
       {/each}
     </div>
@@ -202,12 +232,58 @@
 
   .modes h2,
   .snapshot h2 {
-    margin: 0 0 10px;
+    margin: 0;
     font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.12em;
     color: var(--text-muted);
+  }
+
+  .snapshot h2 {
+    margin: 0 0 10px;
+  }
+
+  .modes-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .size-pills {
+    display: flex;
+    gap: 4px;
+    padding: 3px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+  }
+
+  .size-pill {
+    min-width: 28px;
+    padding: 4px 10px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    border-radius: 999px;
+    font-variant-numeric: tabular-nums;
+    transition: background var(--transition-fast), color var(--transition-fast);
+  }
+
+  .size-pill:hover {
+    color: var(--text);
+  }
+
+  .size-pill.active {
+    background: var(--accent);
+    color: white;
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--accent) 40%, transparent);
   }
 
   .mode-grid {
@@ -217,6 +293,7 @@
   }
 
   .mode-tile {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -233,6 +310,20 @@
     font-weight: 600;
     transition: transform var(--transition-fast), border-color var(--transition-fast),
       box-shadow var(--transition-fast);
+  }
+
+  .mode-tile .size-tag {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    padding: 1px 6px;
+    border-radius: 999px;
+    background: var(--surface-strong);
+    color: var(--mode-color, var(--accent));
+    font-size: 10px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    border: 1px solid var(--border);
   }
 
   .mode-tile:hover {

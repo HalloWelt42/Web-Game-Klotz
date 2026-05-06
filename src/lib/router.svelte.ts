@@ -142,7 +142,10 @@ export function routeToPath(route: Route): string {
     case 'home':
       return '/';
     case 'mode':
-      return route.size && route.size !== 10
+      // Wenn explizit size übergeben wurde, immer als Suffix in die URL --
+      // sonst würde ein Wechsel von 8x8 auf 10x10 als gleiche URL landen
+      // und beim Click auf die Modi-Kachel still verschluckt werden.
+      return route.size
         ? `${MODE_PATHS[route.mode]}/${route.size}`
         : MODE_PATHS[route.mode];
     case 'levels':
@@ -150,7 +153,7 @@ export function routeToPath(route: Route): string {
     case 'level':
       return `/levels/${route.id}`;
     case 'seed':
-      return route.size && route.size !== 10
+      return route.size
         ? `/seed/${encodeURIComponent(route.raw)}/${route.size}`
         : `/seed/${encodeURIComponent(route.raw)}`;
     case 'replay': {

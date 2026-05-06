@@ -48,8 +48,11 @@
   async function applyRouteAction() {
     const r = router.route;
     if (r.kind === 'mode') {
-      // Bereits laufende Partie im selben Modus nicht überschreiben
-      const sizeOk = !r.size || settings.value.boardSize === r.size;
+      // Bereits laufende Partie im selben Modus mit gleicher Brettgröße
+      // nicht überschreiben. Wichtig: Vergleich mit der TATSÄCHLICHEN
+      // Größe der laufenden Partie, nicht mit den Settings -- sonst
+      // würde ein Größenwechsel still verschluckt.
+      const sizeOk = !r.size || game.state.boardSize === r.size;
       if (
         game.state.mode === r.mode &&
         game.state.status === 'running' &&
