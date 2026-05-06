@@ -265,26 +265,95 @@ export function playSfx(
       break;
     }
     case 'bomb': {
-      // Tiefer Boom mit Druckwelle
-      noise(420, 0.22, 600, 'lowpass');
-      tone(60, 380, {
+      const c = getCtx();
+      if (!c || !masterGain) break;
+      const now = c.currentTime;
+
+      // Phase 1: Zuendung -- harter hochfrequenter Crack
+      click(2.0);
+      noise(60, 0.18, 6000, 'bandpass');
+
+      // Phase 2: Initialer Punch -- breiter mid-frequency Hit
+      const punch = c.createOscillator();
+      punch.type = 'square';
+      const punchGain = c.createGain();
+      const punchFilter = c.createBiquadFilter();
+      punchFilter.type = 'lowpass';
+      punchFilter.frequency.setValueAtTime(1500, now);
+      punchFilter.frequency.exponentialRampToValueAtTime(150, now + 0.08);
+      punchFilter.Q.value = 6;
+      punch.frequency.setValueAtTime(220, now);
+      punch.frequency.exponentialRampToValueAtTime(45, now + 0.1);
+      punchGain.gain.setValueAtTime(0.0001, now);
+      punchGain.gain.exponentialRampToValueAtTime(0.32, now + 0.005);
+      punchGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
+      punch.connect(punchFilter);
+      punchFilter.connect(punchGain);
+      punchGain.connect(masterGain);
+      if (convolver) {
+        const send = c.createGain();
+        send.gain.value = 0.4;
+        punchGain.connect(send);
+        send.connect(convolver);
+      }
+      punch.start(now);
+      punch.stop(now + 0.22);
+
+      // Phase 3: Sub-Boom -- tiefer Sweep mit Saettigung
+      tone(80, 600, {
         type: 'sawtooth',
-        gain: 0.22,
-        attack: 0.002,
-        decay: 0.35,
-        release: 0.1,
-        filterFreq: 500,
-        filterQ: 4,
-        pitchEnvelope: { from: 130, to: 38, time: 0.18 },
-        reverb: 0.35,
+        gain: 0.28,
+        attack: 0.003,
+        decay: 0.5,
+        release: 0.2,
+        filterFreq: 380,
+        filterQ: 8,
+        pitchEnvelope: { from: 180, to: 28, time: 0.32 },
+        reverb: 0.55,
       });
-      // Krachen am Anfang
-      click(1.4);
+
+      // Phase 4: Stereo-Rumble -- breites tieffrequentes Rauschen
+      noise(700, 0.16, 280, 'lowpass');
+
+      // Phase 5: Druckwelle-Whoosh nach dem Boom
       setTimeout(() => {
-        tone(45, 280, { type: 'sine', gain: 0.12, decay: 0.28, reverb: 0.4 });
-      }, 60);
-      // Splitter-Schrapnell
-      setTimeout(() => noise(140, 0.05, 4000, 'highpass'), 100);
+        noise(380, 0.1, 1800, 'bandpass');
+        tone(55, 420, {
+          type: 'sine',
+          gain: 0.14,
+          attack: 0.005,
+          decay: 0.4,
+          release: 0.15,
+          reverb: 0.6,
+        });
+      }, 80);
+
+      // Phase 6: Splitter-Schrapnell -- mehrere kurze Hochton-Pings versetzt
+      [120, 180, 240, 320].forEach((delay, i) => {
+        setTimeout(() => {
+          noise(60, 0.04 - i * 0.005, 5000 + i * 800, 'highpass');
+          tone(2400 + i * 600, 50, {
+            type: 'triangle',
+            gain: 0.04,
+            attack: 0.001,
+            decay: 0.05,
+            release: 0.02,
+          });
+        }, delay);
+      });
+
+      // Phase 7: Langer Hall-Tail
+      setTimeout(() => {
+        tone(38, 700, {
+          type: 'sine',
+          gain: 0.08,
+          attack: 0.05,
+          decay: 0.6,
+          release: 0.3,
+          reverb: 0.85,
+        });
+      }, 280);
+
       break;
     }
     case 'hammer': {

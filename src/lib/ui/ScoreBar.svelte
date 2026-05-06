@@ -77,35 +77,41 @@
   }
 </script>
 
-<div class="bar" role="status" aria-live="polite">
-  <div class="block">
-    <span class="label">{MODES[mode].label}</span>
-    <span class="value primary" class:bumping>{displayedScore}</span>
-  </div>
-  <div class="block">
-    <span class="label">Bestwert</span>
-    <span class="value">{highscore}</span>
-  </div>
-  <div class="block combo" class:active={combo > 0}>
-    <span class="label">Combo</span>
-    <span class="value">{combo > 0 ? `x${combo}` : '-'}</span>
-  </div>
-  {#if timeLeft !== undefined}
-    <div class="block extra">
-      <span class="label">Zeit</span>
-      <span class="value">{fmtTime(timeLeft)}</span>
+<div class="hud" role="status" aria-live="polite">
+  <div class="hud-side left">
+    <div class={`combo-badge ${combo >= 5 ? 'mega' : combo > 0 ? 'on' : ''}`}>
+      <span class="combo-multi">{combo > 0 ? `x${combo}` : 'x1'}</span>
+      <span class="combo-label">Combo</span>
     </div>
-  {/if}
-  {#if movesLeft !== null}
-    <div class="block extra">
-      <span class="label">Zuege</span>
-      <span class="value">{movesLeft}</span>
+    {#if timeLeft !== undefined}
+      <div class={`chip ${timeLeft < 30 ? 'urgent' : ''}`}>
+        <i class="fa-solid fa-stopwatch"></i>
+        <span>{fmtTime(timeLeft)}</span>
+      </div>
+    {/if}
+    {#if movesLeft !== null}
+      <div class={`chip ${movesLeft <= 3 ? 'urgent' : ''}`}>
+        <i class="fa-solid fa-shoe-prints"></i>
+        <span>{movesLeft} Z.</span>
+      </div>
+    {/if}
+  </div>
+
+  <div class="hud-center">
+    <div class="score-value" class:bumping>{displayedScore}</div>
+    <div class="score-mode">{MODES[mode].label}</div>
+  </div>
+
+  <div class="hud-side right">
+    <div class="chip best">
+      <i class="fa-solid fa-trophy"></i>
+      <span>{highscore}</span>
     </div>
-  {/if}
-  {#if goalProgress}
-    {@const pct = Math.min(1, goalProgress.target > 0 ? goalProgress.current / goalProgress.target : 0)}
-    <div class="block extra goal">
-      <span class="label">Ziel ({goalProgress.label})</span>
+    {#if goalProgress}
+      {@const pct = Math.min(
+        1,
+        goalProgress.target > 0 ? goalProgress.current / goalProgress.target : 0,
+      )}
       <div class="ring" style:--pct={`${pct * 100}%`}>
         <svg viewBox="0 0 36 36" aria-hidden="true">
           <circle class="ring-bg" cx="18" cy="18" r="15.5"></circle>
@@ -124,53 +130,165 @@
           <span class="tgt">{goalProgress.target}</span>
         </span>
       </div>
-    </div>
-  {/if}
+    {/if}
+  </div>
 </div>
 
 <style>
-  .bar {
+  .hud {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    padding: 12px;
-    background: var(--surface-strong);
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    background: linear-gradient(180deg, var(--surface) 0%, var(--surface-strong) 100%);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.05),
+      0 4px 14px rgba(0, 0, 0, 0.18);
   }
 
-  .block.extra {
-    grid-column: span 1;
+  .hud-side {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
   }
 
-  .block {
+  .hud-side.left {
+    justify-content: flex-start;
+  }
+
+  .hud-side.right {
+    justify-content: flex-end;
+  }
+
+  .hud-center {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 2px;
+    gap: 0;
+    min-width: 96px;
   }
 
-  .label {
-    font-size: 11px;
+  .score-value {
+    font-size: 38px;
+    font-weight: 900;
+    line-height: 1;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+    text-shadow:
+      0 0 14px color-mix(in srgb, var(--accent) 40%, transparent),
+      0 2px 0 rgba(0, 0, 0, 0.3);
+  }
+
+  .score-value.bumping {
+    animation: score-bump 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .score-mode {
+    font-size: 10px;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.18em;
     color: var(--text-muted);
+    margin-top: 2px;
+    font-weight: 600;
   }
 
-  .value {
-    font-size: 22px;
-    font-weight: 700;
-    color: var(--text);
+  .combo-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 6px 10px;
+    border-radius: 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    min-width: 56px;
+    transition: all var(--transition-fast);
+  }
+
+  .combo-badge.on {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.25), rgba(34, 197, 94, 0.05));
+    border-color: var(--success);
+    color: var(--success);
+    box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.18), 0 0 14px rgba(34, 197, 94, 0.32);
+  }
+
+  .combo-badge.mega {
+    background: linear-gradient(135deg, #f97316, #ec4899);
+    border-color: #ec4899;
+    color: white;
+    box-shadow: 0 0 16px rgba(236, 72, 153, 0.55);
+    animation: combo-mega 0.7s ease-in-out infinite alternate;
+  }
+
+  .combo-multi {
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 1;
     font-variant-numeric: tabular-nums;
   }
 
-  .value.primary {
-    color: var(--accent);
-    transition: transform var(--transition-fast);
+  .combo-label {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-top: 2px;
+    font-weight: 600;
   }
 
-  .value.primary.bumping {
-    animation: score-bump 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .chip i {
+    color: var(--text-muted);
+    font-size: 12px;
+  }
+
+  .chip.urgent {
+    border-color: var(--danger);
+    color: var(--danger);
+    animation: chip-urgent 0.6s ease-in-out infinite alternate;
+  }
+
+  .chip.urgent i {
+    color: var(--danger);
+  }
+
+  .chip.best i {
+    color: #f59e0b;
+  }
+
+  @keyframes combo-mega {
+    0% {
+      transform: scale(1);
+    }
+    100% {
+      transform: scale(1.05);
+    }
+  }
+
+  @keyframes chip-urgent {
+    0% {
+      box-shadow: 0 0 0 0 rgba(225, 29, 72, 0.4);
+    }
+    100% {
+      box-shadow: 0 0 0 6px rgba(225, 29, 72, 0);
+    }
   }
 
   @keyframes score-bump {
@@ -179,18 +297,14 @@
       transform: scale(1);
     }
     50% {
-      transform: scale(1.18);
+      transform: scale(1.16);
     }
-  }
-
-  .combo.active .value {
-    color: var(--success);
   }
 
   .ring {
     position: relative;
-    width: 64px;
-    height: 64px;
+    width: 56px;
+    height: 56px;
     display: grid;
     place-items: center;
   }

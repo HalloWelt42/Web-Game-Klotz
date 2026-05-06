@@ -22,6 +22,7 @@
   import Modal from './lib/ui/Modal.svelte';
   import DonateModal from './lib/ui/DonateModal.svelte';
   import NewGameWizard from './lib/ui/NewGameWizard.svelte';
+  import PauseOverlay from './lib/ui/PauseOverlay.svelte';
   import DragGhost from './lib/ui/DragGhost.svelte';
   import ToastStack from './lib/ui/ToastStack.svelte';
   import FxOverlay from './lib/ui/FxOverlay.svelte';
@@ -255,10 +256,32 @@
 
   $effect(() => {
     if (game.state.timeLimit === undefined) return;
-    if (game.state.status !== 'running') return;
+    if (game.state.status !== 'running' || game.paused) return;
     const handle = setInterval(() => game.tickTime(1), 1000);
     return () => clearInterval(handle);
   });
+
+  function handleGlobalKey(event: KeyboardEvent) {
+    if (event.key !== 'Escape') return;
+    // Wenn ein Modal/Overlay offen ist, hat es Vorrang
+    if (
+      showWizard ||
+      showSettings ||
+      showStats ||
+      showAchievements ||
+      showReplays ||
+      showResume ||
+      showDonate ||
+      showLevelPicker ||
+      showTutorial
+    ) {
+      return;
+    }
+    if (game.state.status === 'running') {
+      event.preventDefault();
+      game.togglePause();
+    }
+  }
 
   function handlePickup(event: {
     slotIndex: 0 | 1 | 2;
@@ -292,6 +315,15 @@
       onclick={() => game.performUndo()}
     >
       <i class="fa-solid fa-arrow-rotate-left"></i>
+    </button>
+    <button
+      class="ghost"
+      title="Pause (Esc)"
+      aria-label="Pause"
+      disabled={game.state.status !== 'running'}
+      onclick={() => game.togglePause()}
+    >
+      <i class={`fa-solid ${game.paused ? 'fa-play' : 'fa-pause'}`}></i>
     </button>
     <button
       class="ghost new-game"
@@ -344,6 +376,8 @@
   </div>
 </header>
 
+<svelte:window onkeydown={handleGlobalKey} />
+
 <main>
   <aside class="side left">
     <SidebarAchievements />
@@ -356,9 +390,6 @@
     </div>
     <PiecePool onPickup={handlePickup} />
     <SpecialsBar />
-    <div class="hint">
-      Stein anfassen, ziehen, loslassen. Tab + Pfeile + Enter fuer Tastatur.
-    </div>
   </section>
 
   <aside class="side right">
@@ -406,6 +437,14 @@
 
 <DonateModal open={showDonate} onClose={closeOverlay} />
 
+<PauseOverlay
+  onResume={() => game.unpause()}
+  onNew={() => {
+    game.unpause();
+    showWizard = true;
+  }}
+/>
+
 <Modal open={showResume} title="Partie fortsetzen?" closeOnBackdrop={false}>
   <p>Es liegt eine laufende Endless-Partie vor. Moechtest du fortsetzen oder neu beginnen?</p>
   {#snippet footer()}
@@ -431,9 +470,11 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 12px 16px;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
+    padding: 8px 14px;
+    background: color-mix(in srgb, var(--surface) 85%, transparent);
+    backdrop-filter: blur(14px) saturate(1.2);
+    -webkit-backdrop-filter: blur(14px) saturate(1.2);
+    border-bottom: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
     position: sticky;
     top: 0;
     z-index: 10;
@@ -442,10 +483,11 @@
   .title {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     font-weight: 700;
-    font-size: 18px;
+    font-size: 16px;
     color: var(--text);
+    letter-spacing: 0.02em;
   }
 
   .title i {
@@ -484,11 +526,19 @@
 
   .actions {
     display: flex;
-    gap: 4px;
+    gap: 2px;
   }
 
   .actions button {
-    padding: 8px 10px;
+    padding: 7px 9px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 8px;
+  }
+
+  .actions button:hover:not(:disabled) {
+    background: var(--surface-strong);
+    border-color: var(--border);
   }
 
   .donate-btn i {

@@ -76,6 +76,7 @@ function createGameStore() {
   let fx = $state<FxEvent[]>([]);
   let boardCenter = $state<{ x: number; y: number }>({ x: 0, y: 0 });
   let pendingSpecial = $state<SpecialKind | null>(null);
+  let paused = $state(false);
 
   function setBoardCenter(x: number, y: number) {
     boardCenter = { x, y };
@@ -102,6 +103,7 @@ function createGameStore() {
     fx = [];
     toasts = [];
     pendingSpecial = null;
+    paused = false;
     if (mode === 'endless') {
       await saveEndlessSave(null);
     }
@@ -142,7 +144,7 @@ function createGameStore() {
     pointer: { x: number; y: number },
     anchor: { x: number; y: number },
   ) {
-    if (state.status !== 'running') return;
+    if (state.status !== 'running' || paused) return;
     const slot = state.pool[slotIndex];
     if (!slot || slot.consumed) return;
     drag = { active: true, slotIndex, pointer, anchor, hover: null };
@@ -399,6 +401,19 @@ function createGameStore() {
     },
     get pendingSpecial() {
       return pendingSpecial;
+    },
+    get paused() {
+      return paused;
+    },
+    pause() {
+      if (state.status === 'running') paused = true;
+    },
+    unpause() {
+      paused = false;
+    },
+    togglePause() {
+      if (state.status !== 'running') return;
+      paused = !paused;
     },
     init,
     reloadHighscoreFor,
