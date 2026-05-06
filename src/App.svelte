@@ -17,11 +17,11 @@
   import StatsModal from './lib/ui/Stats.svelte';
   import AchievementsModal from './lib/ui/AchievementsModal.svelte';
   import ReplayModal from './lib/ui/ReplayModal.svelte';
-  import ModePicker from './lib/ui/ModePicker.svelte';
   import LevelPicker from './lib/ui/LevelPicker.svelte';
   import ModeHint from './lib/ui/ModeHint.svelte';
   import Modal from './lib/ui/Modal.svelte';
   import DonateModal from './lib/ui/DonateModal.svelte';
+  import NewGameWizard from './lib/ui/NewGameWizard.svelte';
   import DragGhost from './lib/ui/DragGhost.svelte';
   import ToastStack from './lib/ui/ToastStack.svelte';
   import FxOverlay from './lib/ui/FxOverlay.svelte';
@@ -43,7 +43,7 @@
   let showAchievements = $state(false);
   let showReplays = $state(false);
   let showResume = $state(false);
-  let showModePicker = $state(false);
+  let showWizard = $state(false);
   let modeHint = $state<GameMode | null>(null);
   let showLevelPicker = $state(false);
   let showDonate = $state(false);
@@ -297,7 +297,7 @@
       class="ghost new-game"
       title="Neue Partie / Modus waehlen"
       aria-label="Neue Partie"
-      onclick={() => (showModePicker = true)}
+      onclick={() => (showWizard = true)}
     >
       <i class="fa-solid fa-shapes"></i>
     </button>
@@ -388,11 +388,12 @@
 
 <ReplayModal open={showReplays} onClose={closeOverlay} />
 
-<ModePicker
-  open={showModePicker}
-  onClose={() => (showModePicker = false)}
-  onPick={pickMode}
-  onCustomSeed={startCustomSeed}
+<NewGameWizard
+  open={showWizard}
+  onClose={() => (showWizard = false)}
+  onStartMode={(m) => pickMode(m)}
+  onStartLevel={(id) => pickLevel(id)}
+  onStartSeed={(seed, raw) => startCustomSeed(seed, raw)}
 />
 
 <ModeHint open={modeHint !== null} mode={modeHint} onClose={() => (modeHint = null)} />
