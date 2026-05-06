@@ -81,13 +81,26 @@ Daten löschen über Einstellungen > Alle Daten löschen.
 
 Keine externen Requests. Keine Telemetrie. Keine Werbung. Kein Backend.
 
-## Unterstützen
-
-Klotz ist ein Hobby-Projekt. Wer mag, darf einen virtuellen Kaffee springen lassen:
-
-- [Ko-fi: HalloWelt42](https://ko-fi.com/HalloWelt42)
-- Bitcoin, Dogecoin, Ethereum -- Adressen direkt im Spiel unter `/danke`
-
 ## Lizenz
 
-Proprietär. Alle Rechte vorbehalten. Spielen über die offizielle Webseite ist erlaubt, alles weitere siehe [LICENSE](LICENSE).
+Proprietär. Alle Rechte vorbehalten -- siehe [LICENSE](LICENSE).
+
+---
+
+## Unterstützen
+
+Klotz ist ein privates Hobby-Projekt. Kein Tracking, keine Werbung, keine Kompromisse.
+
+Wenn dir das Spiel gefällt, kannst du im Spiel über das Herz-Icon "Danke sagen" -- oder direkt hier:
+
+[![Ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/HalloWelt42)
+
+**Crypto:**
+
+| Coin | Adresse |
+|------|---------|
+| BTC | `bc1qnd599khdkv3v3npmj9ufxzf6h4fzanny2acwqr` |
+| DOGE | `DL7tuiYCqm3xQjMDXChdxeQxqUGMACn1ZV` |
+| ETH | `0x8A28fc47bFFFA03C8f685fa0836E2dBe1CA14F27` |
+
+Copyright (c) 2025-2026 HalloWelt42
