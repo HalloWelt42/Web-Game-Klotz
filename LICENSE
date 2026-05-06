@@ -1,32 +1,61 @@
-Klotz -- Block-Puzzle-Spiel
-Copyright (c) HalloWelt42
+Nicht-kommerzielle Lizenz v1.0
 
+SPDX-License-Identifier: LicenseRef-Klotz-NC-1.0
+Basierend auf CC BY-NC-ND 4.0 mit Ergänzungen
+
+Copyright (c) 2025-2026 HalloWelt42
 Alle Rechte vorbehalten.
 
-Der Quellcode und alle zugehörigen Inhalte (Code, Grafiken, Sounds, Konzepte,
-Spielmechaniken) sind urheberrechtlich geschützt und ausschließliches Eigentum
-des Inhabers. Das Repository wird zu Anschauungs- und Demonstrationszwecken
-öffentlich zugänglich gemacht.
+1. Erlaubte Nutzung
 
-Ohne ausdrückliche schriftliche Genehmigung des Inhabers ist Folgendes
-untersagt:
+   - Private, nicht-kommerzielle Nutzung und Installation
+   - Persönliche Anpassungen für den Eigengebrauch
+   - Erstellung privater Forks (nicht eigenständig veröffentlicht)
+   - Beiträge via Pull Request an das Originalprojekt
+   - Weitergabe des unveränderten Originalwerks mit vollständiger
+     Namensnennung
 
-- Vervielfältigung, Weitergabe oder öffentliche Wiedergabe ganz oder teilweise
-- Bearbeitung, Ableitung oder Erstellung abgeleiteter Werke
-- Kommerzielle oder nichtkommerzielle Nutzung außerhalb des privaten Spielens
-- Wiederveröffentlichung an anderer Stelle (Mirror, Fork-Publikation,
-  App-Stores, Marktplätze)
+2. Verbotene Nutzung
 
-Erlaubt sind:
+   - Jegliche kommerzielle Nutzung, Verkauf oder Lizenzierung
+   - Öffentliche Verbreitung modifizierter Versionen
+   - Darstellung von Forks als eigenständige Projekte
+   - Entfernung oder Änderung von Urheberrechtshinweisen
+   - Weiterverbreitung unter einer anderen Lizenz
+   - Nutzung des Namens "Klotz" oder des Logos für abgeleitete
+     Projekte ohne schriftliche Genehmigung
 
-- Spielen der über die offizielle Webseite bereitgestellten Version
-- Lesen des Codes zu Lern- und Anschauungszwecken
-- Pull Requests an dieses Repository (mit Übertragung der Rechte am Beitrag
-  an den Inhaber)
+3. Modifikationen
 
-Für Anfragen zu Lizenzierung oder Sonderrechten:
-my@jobmagnetix.de
+   Modifizierte Versionen dürfen nicht öffentlich verbreitet, gehostet
+   oder Dritten zugänglich gemacht werden. Ausnahme: Pull Requests an
+   das Originalprojekt.
 
-Die Software wird ohne jegliche ausdrückliche oder stillschweigende
-Gewährleistung zur Verfügung gestellt. Der Inhaber haftet nicht für Schäden,
-die aus der Nutzung entstehen.
+4. Beiträge
+
+   Mit dem Einreichen eines Pull Requests erklärt sich der Beitragende
+   damit einverstanden, dass der Beitrag unter dieser Lizenz steht und
+   die Rechte an HalloWelt42 übertragen werden.
+
+5. Haftungsausschluss
+
+   DIE SOFTWARE WIRD "WIE BESEHEN" BEREITGESTELLT, OHNE JEGLICHE
+   GEWÄHRLEISTUNG, WEDER AUSDRÜCKLICH NOCH STILLSCHWEIGEND.
+   IN KEINEM FALL HAFTEN DIE AUTOREN FÜR SCHÄDEN JEGLICHER ART,
+   DIE AUS DER NUTZUNG DER SOFTWARE ENTSTEHEN.
+
+6. Drittanbieter-Komponenten
+
+   Diese Software nutzt folgende Open-Source-Bibliotheken:
+   - Svelte (MIT)
+   - Vite (MIT)
+   - Font Awesome (SIL OFL 1.1 / MIT)
+   - Chakra Petch (SIL OFL 1.1)
+   - idb-keyval (Apache-2.0)
+
+   Die jeweiligen Lizenzen dieser Komponenten bleiben unberührt.
+
+7. Verstoß
+
+   Bei Verstoß gegen diese Lizenzbedingungen erlischt das Nutzungsrecht
+   automatisch. Alle Kopien müssen unverzüglich gelöscht werden.

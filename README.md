@@ -83,7 +83,11 @@ Keine externen Requests. Keine Telemetrie. Keine Werbung. Kein Backend.
 
 ## Lizenz
 
-Proprietär. Alle Rechte vorbehalten -- siehe [LICENSE](LICENSE).
+**Nicht-kommerzielle Nutzung** -- Siehe [LICENSE](LICENSE)
+
+Erlaubt: Private Nutzung, Installation, persönliche Anpassungen, Teilen mit Quellenangabe
+
+Verboten: Kommerzielle Nutzung, Verkauf, Einbindung in kommerzielle Produkte
 
 ---
 
