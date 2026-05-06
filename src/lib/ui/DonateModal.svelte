@@ -5,9 +5,10 @@
   type Props = {
     open: boolean;
     onClose: () => void;
+    inline?: boolean;
   };
 
-  let { open, onClose }: Props = $props();
+  let { open, onClose, inline = false }: Props = $props();
 
   const KOFI = 'https://ko-fi.com/HalloWelt42';
 
@@ -53,7 +54,7 @@
   }
 </script>
 
-<Modal {open} title="Mit Liebe gemacht" {onClose}>
+<Modal {open} title="Mit Liebe gemacht" {onClose} {inline}>
   <div class="donate">
     <div class="hero">
       <i class="fa-solid fa-heart heart"></i>

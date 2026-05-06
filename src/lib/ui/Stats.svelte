@@ -9,9 +9,10 @@
   type Props = {
     open: boolean;
     onClose: () => void;
+    inline?: boolean;
   };
 
-  let { open, onClose }: Props = $props();
+  let { open, onClose, inline = false }: Props = $props();
 
   const heatMax = $derived.by(() => {
     let m = 0;
@@ -63,7 +64,7 @@
   }
 </script>
 
-<Modal {open} title="Statistik" {onClose}>
+<Modal {open} title="Statistik" {onClose} {inline}>
   <div class="stats">
     <dl>
       <div>

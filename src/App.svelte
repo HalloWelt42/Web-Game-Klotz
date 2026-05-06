@@ -39,15 +39,9 @@
   let cellSize = $state(36);
   const cellGap = 4;
 
-  let showTutorial = $state(false);
-  let showSettings = $state(false);
-  let showStats = $state(false);
-  let showAchievements = $state(false);
-  let showReplays = $state(false);
   let showWizard = $state(false);
   let modeHint = $state<GameMode | null>(null);
   let showLevelPicker = $state(false);
-  let showDonate = $state(false);
   let showSurrenderConfirm = $state(false);
 
   let initialised = $state(false);
@@ -99,13 +93,7 @@
 
   $effect(() => {
     const r = router.route;
-    showStats = r.kind === 'stats';
-    showAchievements = r.kind === 'achievements';
-    showReplays = r.kind === 'replays';
-    showSettings = r.kind === 'settings';
-    showTutorial = r.kind === 'help';
     showLevelPicker = r.kind === 'levels';
-    showDonate = r.kind === 'donate';
     if (
       initialised &&
       (r.kind === 'mode' || r.kind === 'level' || r.kind === 'seed' || r.kind === 'replay')
@@ -133,7 +121,6 @@
     }
 
     if (!localStorage.getItem(TUTORIAL_KEY)) {
-      showTutorial = true;
       router.navigate({ kind: 'help' }, { replace: true });
     }
     initialised = true;
@@ -284,16 +271,17 @@
   function handleGlobalKey(event: KeyboardEvent) {
     if (event.key !== 'Escape') return;
     // Wenn ein Modal/Overlay offen ist, hat es Vorrang
+    const r = router.route;
     if (
       showWizard ||
-      showSettings ||
-      showStats ||
-      showAchievements ||
-      showReplays ||
-      showDonate ||
       showLevelPicker ||
-      showTutorial ||
-      showSurrenderConfirm
+      showSurrenderConfirm ||
+      r.kind === 'stats' ||
+      r.kind === 'achievements' ||
+      r.kind === 'replays' ||
+      r.kind === 'settings' ||
+      r.kind === 'donate' ||
+      r.kind === 'help'
     ) {
       return;
     }
@@ -407,9 +395,29 @@
 
 <svelte:window onkeydown={handleGlobalKey} />
 
-<main class:home={router.route.kind === 'home'}>
+<main
+  class:home={router.route.kind === 'home'}
+  class:page={router.route.kind === 'stats' ||
+    router.route.kind === 'achievements' ||
+    router.route.kind === 'replays' ||
+    router.route.kind === 'settings' ||
+    router.route.kind === 'donate' ||
+    router.route.kind === 'help'}
+>
   {#if router.route.kind === 'home'}
     <MainMenu onStartNew={() => (showWizard = true)} />
+  {:else if router.route.kind === 'stats'}
+    <StatsModal open inline onClose={closeOverlay} />
+  {:else if router.route.kind === 'achievements'}
+    <AchievementsModal open inline onClose={closeOverlay} />
+  {:else if router.route.kind === 'replays'}
+    <ReplayModal open inline onClose={closeOverlay} />
+  {:else if router.route.kind === 'settings'}
+    <SettingsModal open inline onClose={closeOverlay} onShowTutorial={showTutorialAgain} />
+  {:else if router.route.kind === 'donate'}
+    <DonateModal open inline onClose={closeOverlay} />
+  {:else if router.route.kind === 'help'}
+    <TutorialOverlay open inline onClose={closeTutorial} />
   {:else}
     <aside class="side left">
       <SidebarAchievements />
@@ -438,20 +446,6 @@
 
 <GameOverDialog />
 
-<TutorialOverlay open={showTutorial} onClose={closeTutorial} />
-
-<SettingsModal
-  open={showSettings}
-  onClose={closeOverlay}
-  onShowTutorial={showTutorialAgain}
-/>
-
-<StatsModal open={showStats} onClose={closeOverlay} />
-
-<AchievementsModal open={showAchievements} onClose={closeOverlay} />
-
-<ReplayModal open={showReplays} onClose={closeOverlay} />
-
 <NewGameWizard
   open={showWizard}
   onClose={() => (showWizard = false)}
@@ -467,8 +461,6 @@
   onClose={closeOverlay}
   onPick={pickLevel}
 />
-
-<DonateModal open={showDonate} onClose={closeOverlay} />
 
 <PauseOverlay
   onResume={() => game.unpause()}

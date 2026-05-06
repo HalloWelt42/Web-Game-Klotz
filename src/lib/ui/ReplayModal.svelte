@@ -9,9 +9,10 @@
   type Props = {
     open: boolean;
     onClose: () => void;
+    inline?: boolean;
   };
 
-  let { open, onClose }: Props = $props();
+  let { open, onClose, inline = false }: Props = $props();
   let replays = $state<Replay[]>([]);
   let copied = $state<string | null>(null);
 
@@ -43,7 +44,7 @@
   }
 </script>
 
-<Modal {open} title="Replays" {onClose}>
+<Modal {open} title="Replays" {onClose} {inline}>
   {#if replays.length === 0}
     <p class="empty">Noch keine Replays. Spiele eine Partie zu Ende, um eine zu speichern.</p>
   {:else}

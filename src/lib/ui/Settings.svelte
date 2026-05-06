@@ -9,9 +9,10 @@
     open: boolean;
     onClose: () => void;
     onShowTutorial: () => void;
+    inline?: boolean;
   };
 
-  let { open, onClose, onShowTutorial }: Props = $props();
+  let { open, onClose, onShowTutorial, inline = false }: Props = $props();
 
   let confirmReset = $state(false);
 
@@ -25,7 +26,7 @@
   }
 </script>
 
-<Modal {open} title="Einstellungen" {onClose}>
+<Modal {open} title="Einstellungen" {onClose} {inline}>
   <div class="settings">
     <section>
       <h3>Aussehen</h3>

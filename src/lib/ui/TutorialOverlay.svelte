@@ -4,9 +4,10 @@
   type Props = {
     open: boolean;
     onClose: () => void;
+    inline?: boolean;
   };
 
-  let { open, onClose }: Props = $props();
+  let { open, onClose, inline = false }: Props = $props();
 
   let step = $state(0);
 
@@ -66,7 +67,7 @@
   const last = $derived(step === slides.length - 1);
 </script>
 
-<Modal {open} title={current.title} {onClose}>
+<Modal {open} title={current.title} {onClose} {inline}>
   <div class="slide">
     <div class="icon">
       <i class={`fa-solid ${current.icon}`}></i>

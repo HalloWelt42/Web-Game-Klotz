@@ -6,14 +6,15 @@
   type Props = {
     open: boolean;
     onClose: () => void;
+    inline?: boolean;
   };
 
-  let { open, onClose }: Props = $props();
+  let { open, onClose, inline = false }: Props = $props();
 
   const unlockedSet = $derived(new Set(stats.value.achievements));
 </script>
 
-<Modal {open} title="Erfolge" {onClose}>
+<Modal {open} title="Erfolge" {onClose} {inline}>
   <div class="meta">
     <strong>{stats.value.achievements.length}</strong> von {ACHIEVEMENTS.length} freigeschaltet
   </div>

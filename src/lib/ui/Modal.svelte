@@ -4,11 +4,20 @@
     title: string;
     onClose?: () => void;
     closeOnBackdrop?: boolean;
+    inline?: boolean;
     children?: import('svelte').Snippet;
     footer?: import('svelte').Snippet;
   };
 
-  let { open, title, onClose, closeOnBackdrop = true, children, footer }: Props = $props();
+  let {
+    open,
+    title,
+    onClose,
+    closeOnBackdrop = true,
+    inline = false,
+    children,
+    footer,
+  }: Props = $props();
 
   function handleBackdrop(event: PointerEvent) {
     if (event.target !== event.currentTarget) return;
@@ -16,7 +25,7 @@
   }
 
   function handleKey(event: KeyboardEvent) {
-    if (!open) return;
+    if (!open || inline) return;
     if (event.key === 'Escape' && onClose) {
       event.preventDefault();
       event.stopPropagation();
@@ -27,7 +36,25 @@
 
 <svelte:window onkeydown={handleKey} />
 
-{#if open}
+{#if open && inline}
+  <section
+    class="page"
+    aria-labelledby="page-title"
+  >
+    <header class="page-header">
+      {#if onClose}
+        <button class="ghost back" onclick={onClose} aria-label="Zurück">
+          <i class="fa-solid fa-arrow-left"></i>
+        </button>
+      {/if}
+      <h2 id="page-title">{title}</h2>
+    </header>
+    <div class="page-body">{@render children?.()}</div>
+    {#if footer}
+      <footer class="page-footer">{@render footer()}</footer>
+    {/if}
+  </section>
+{:else if open}
   <div
     class="backdrop"
     role="presentation"
@@ -111,5 +138,53 @@
 
   .close {
     padding: 6px 8px;
+  }
+
+  /* Inline-Page-Layout */
+  .page {
+    width: 100%;
+    max-width: 720px;
+    margin: 0 auto;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .page-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-strong);
+  }
+
+  .page-header h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  .back {
+    padding: 6px 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .page-body {
+    padding: 20px;
+  }
+
+  .page-footer {
+    padding: 14px 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
   }
 </style>
