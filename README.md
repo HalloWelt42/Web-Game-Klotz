@@ -4,6 +4,12 @@ Block-Puzzle-Spiel im 1010!-Stil als Web-PWA. Lokal, offline, ohne Tracker.
 
 **Direkt spielen:** <https://hallowelt42.github.io/Web-Game-Klotz/>
 
+<p align="center">
+  <img src="docs/screenshots/01-menu.png" width="32%" alt="Hauptmenü" />
+  <img src="docs/screenshots/02-game.png" width="32%" alt="Reverse-Modus mit gefülltem Brett" />
+  <img src="docs/screenshots/03-stats.png" width="32%" alt="Statistik-Seite" />
+</p>
+
 ## Spielprinzip
 
 - Quadratisches Brett (6x6, 8x8, 10x10 oder 12x12), wählbar pro Modus
