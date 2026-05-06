@@ -53,7 +53,8 @@ export type FxEvent = {
     | 'special-earned'
     | 'row-wipe'
     | 'col-wipe'
-    | 'coin';
+    | 'coin'
+    | 'star-burst';
   x: number;
   y: number;
   payload?: number | string;
@@ -129,7 +130,7 @@ function createGameStore() {
   function pushFx(f: Omit<FxEvent, 'id' | 'at'>) {
     const ev: FxEvent = { ...f, id: nextFxId++, at: Date.now() };
     fx = [...fx, ev];
-    const ttl = ev.kind === 'coin' ? 1800 : 1200;
+    const ttl = ev.kind === 'coin' ? 1800 : ev.kind === 'star-burst' ? 2000 : 1200;
     setTimeout(() => {
       fx = fx.filter((x) => x.id !== ev.id);
     }, ttl);
@@ -259,7 +260,10 @@ function createGameStore() {
     } else {
       playSfx('won', settings.value.sound);
       pushFx({ kind: 'confetti', x: 0, y: 0 });
-      vibrate([60, 40, 60, 40, 100], settings.value.haptics);
+      pushFx({ kind: 'star-burst', x: 0, y: 0 });
+      setTimeout(() => playSfx('reward-stars', settings.value.sound), 300);
+      setTimeout(() => pushFx({ kind: 'screen-shake', x: 0, y: 0 }), 250);
+      vibrate([60, 40, 60, 40, 100, 40, 80], settings.value.haptics);
     }
     const snap = $state.snapshot(state) as GameState;
     await stats.recordGameOver(snap);

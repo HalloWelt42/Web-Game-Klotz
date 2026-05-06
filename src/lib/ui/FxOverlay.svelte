@@ -213,6 +213,24 @@
       </div>
     {:else if f.kind === 'pop'}
       <div class="pop">{f.payload}</div>
+    {:else if f.kind === 'star-burst'}
+      <div class="star-burst">
+        {#each [0, 1, 2] as i}
+          <span class="big-star" style:--n={i}>
+            <i class="fa-solid fa-star"></i>
+          </span>
+        {/each}
+        {#each makeSparks(f.id, 24, ['#fde047', '#facc15', '#fef3c7', '#f59e0b'], 220) as sp (sp.id)}
+          <span
+            class="ray"
+            style:--ang={`${sp.angle}rad`}
+            style:--dist={`${sp.distance}px`}
+            style:--size={`${sp.size}px`}
+            style:--color={sp.color}
+            style:--delay={`${sp.delay}ms`}
+          ></span>
+        {/each}
+      </div>
     {/if}
   {/each}
 
@@ -341,6 +359,92 @@
     animation: fall 1.2s ease-out forwards;
   }
 
+  .star-burst {
+    position: absolute;
+    left: var(--cx);
+    top: var(--cy);
+    width: 0;
+    height: 0;
+    pointer-events: none;
+    animation: star-burst-fade 1.6s ease-out forwards;
+  }
+
+  .big-star {
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: #fde047;
+    font-size: 56px;
+    text-shadow: 0 0 24px rgba(250, 204, 21, 0.85), 0 4px 12px rgba(0, 0, 0, 0.4);
+    transform: translate(-50%, -50%) scale(0);
+    animation: big-star-pop 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) calc(var(--n) * 220ms) forwards;
+  }
+
+  .big-star:nth-child(1) {
+    transform: translate(calc(-50% - 70px), -50%) scale(0);
+  }
+  .big-star:nth-child(3) {
+    transform: translate(calc(-50% + 70px), -50%) scale(0);
+  }
+
+  .ray {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: var(--size);
+    height: var(--size);
+    background: var(--color);
+    border-radius: 50%;
+    box-shadow: 0 0 16px var(--color);
+    transform: translate(-50%, -50%);
+    animation: ray-fly 1.4s cubic-bezier(0.16, 1, 0.3, 1) var(--delay) forwards;
+  }
+
+  @keyframes big-star-pop {
+    0% {
+      opacity: 0;
+      transform: var(--start-x, translate(-50%, -50%)) scale(0) rotate(-30deg);
+    }
+    35% {
+      opacity: 1;
+      transform: scale(1.4) rotate(15deg);
+    }
+    65% {
+      transform: scale(1) rotate(-5deg);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1) rotate(0deg);
+    }
+  }
+
+  @keyframes ray-fly {
+    0% {
+      transform: translate(-50%, -50%) scale(0.4);
+      opacity: 1;
+    }
+    60% {
+      opacity: 1;
+    }
+    100% {
+      transform: translate(
+          calc(-50% + cos(var(--ang)) * var(--dist)),
+          calc(-50% + sin(var(--ang)) * var(--dist))
+        )
+        scale(0.6);
+      opacity: 0;
+    }
+  }
+
+  @keyframes star-burst-fade {
+    0%, 80% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+
   .pop {
     position: absolute;
     left: var(--cx);
@@ -363,44 +467,74 @@
     position: absolute;
     left: var(--sx);
     top: var(--sy);
-    width: 22px;
-    height: 22px;
-    margin-left: -11px;
-    margin-top: -11px;
+    width: 24px;
+    height: 24px;
+    margin-left: -12px;
+    margin-top: -12px;
     border-radius: 50%;
-    background: radial-gradient(circle at 35% 30%, #fef9c3 0%, #facc15 35%, #b45309 90%);
-    box-shadow: 0 0 12px rgba(250, 204, 21, 0.7), inset 0 -2px 0 rgba(0, 0, 0, 0.25),
-      inset 0 2px 0 rgba(255, 255, 255, 0.5);
+    background: radial-gradient(circle at 32% 28%, #fffbe6 0%, #fde047 30%, #f59e0b 60%, #b45309 100%);
+    box-shadow:
+      0 0 16px rgba(250, 204, 21, 0.85),
+      0 0 32px rgba(250, 204, 21, 0.45),
+      inset 0 -3px 0 rgba(120, 53, 15, 0.45),
+      inset 0 2px 0 rgba(255, 255, 255, 0.7);
     color: #78350f;
-    font-weight: 800;
-    font-size: 12px;
+    font-weight: 900;
+    font-size: 13px;
     display: grid;
     place-items: center;
     --travel-x: calc(var(--tx) - var(--sx));
     --travel-y: calc(var(--ty) - var(--sy));
-    animation: coin-fly 700ms cubic-bezier(0.5, -0.2, 0.5, 1.2) var(--delay) forwards;
+    animation: coin-fly 850ms cubic-bezier(0.55, -0.4, 0.95, 0.7) var(--delay) forwards;
+    opacity: 0;
+  }
+
+  .coin::after {
+    content: '';
+    position: absolute;
+    inset: -8px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(250, 204, 21, 0.4) 0%, transparent 70%);
+    pointer-events: none;
+    animation: coin-trail 850ms ease-out var(--delay) forwards;
     opacity: 0;
   }
 
   .coin-face {
-    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5), 0 0 4px rgba(255, 215, 0, 0.6);
   }
 
   @keyframes coin-fly {
     0% {
-      transform: translate(0, 0) scale(0.4) rotate(0deg);
+      transform: translate(0, 0) scale(0.3) rotate(0deg);
       opacity: 0;
     }
-    20% {
-      transform: translate(0, -20px) scale(1) rotate(120deg);
+    12% {
+      transform: translate(0, -32px) scale(1.15) rotate(140deg);
       opacity: 1;
     }
-    85% {
-      transform: translate(calc(var(--travel-x) * 0.95), calc(var(--travel-y) - 30px)) scale(0.9) rotate(540deg);
+    50% {
+      transform: translate(calc(var(--travel-x) * 0.35), calc(var(--travel-y) * 0.2 - 28px)) scale(1) rotate(420deg);
+      opacity: 1;
+    }
+    88% {
+      transform: translate(calc(var(--travel-x) * 0.92), calc(var(--travel-y) * 0.85 - 6px)) scale(0.85) rotate(680deg);
       opacity: 1;
     }
     100% {
-      transform: translate(var(--travel-x), var(--travel-y)) scale(0.3) rotate(720deg);
+      transform: translate(var(--travel-x), var(--travel-y)) scale(0.15) rotate(820deg);
+      opacity: 0;
+    }
+  }
+
+  @keyframes coin-trail {
+    0%, 5% {
+      opacity: 0;
+    }
+    20% {
+      opacity: 0.8;
+    }
+    100% {
       opacity: 0;
     }
   }

@@ -492,10 +492,29 @@
 
   .donate-btn i {
     color: #ff4d6d;
+    animation: heart-pulse 2.4s ease-in-out infinite;
+    text-shadow: 0 0 8px rgba(255, 77, 109, 0.35);
   }
 
   .donate-btn:hover i {
-    text-shadow: 0 0 10px rgba(255, 77, 109, 0.5);
+    color: #ff2e57;
+    text-shadow: 0 0 14px rgba(255, 77, 109, 0.8);
+    animation-duration: 0.9s;
+  }
+
+  @keyframes heart-pulse {
+    0%, 100% {
+      transform: scale(1);
+    }
+    25% {
+      transform: scale(1.18);
+    }
+    50% {
+      transform: scale(0.96);
+    }
+    75% {
+      transform: scale(1.08);
+    }
   }
 
 

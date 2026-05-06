@@ -72,13 +72,13 @@
       {@const cfg = MODES[id]}
       <button
         type="button"
-        class="card"
+        class={`card mode-${id}`}
         onclick={() => {
           onPick(id);
           onClose();
         }}
       >
-        <div class="icon">
+        <div class={`icon mode-${id}`}>
           <i class={`fa-solid ${cfg.icon}`}></i>
         </div>
         <div class="meta">
@@ -90,6 +90,7 @@
           </h3>
           <p>{cfg.description}</p>
         </div>
+        <i class="fa-solid fa-chevron-right chev"></i>
       </button>
     {/each}
 
@@ -135,8 +136,9 @@
   }
 
   .card {
+    position: relative;
     display: grid;
-    grid-template-columns: 48px 1fr;
+    grid-template-columns: 56px 1fr 18px;
     gap: 14px;
     padding: 14px 16px;
     align-items: center;
@@ -145,26 +147,65 @@
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
     cursor: pointer;
-    transition: background var(--transition-fast), transform var(--transition-fast);
+    overflow: hidden;
+    transition: transform var(--transition-fast), border-color var(--transition-fast),
+      box-shadow var(--transition-fast);
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, var(--mode-tint, transparent) 0%, transparent 60%);
+    opacity: 0.4;
+    pointer-events: none;
+    transition: opacity var(--transition-fast);
   }
 
   .card:hover {
-    background: var(--surface-strong);
+    transform: translateY(-2px);
+    border-color: var(--mode-color, var(--accent));
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.18);
+  }
+
+  .card:hover::before {
+    opacity: 0.7;
   }
 
   .card:active {
     transform: scale(0.98);
   }
 
+  .card.mode-endless { --mode-color: #6366f1; --mode-tint: rgba(99, 102, 241, 0.18); }
+  .card.mode-daily { --mode-color: #f59e0b; --mode-tint: rgba(245, 158, 11, 0.18); }
+  .card.mode-level { --mode-color: #22c55e; --mode-tint: rgba(34, 197, 94, 0.18); }
+  .card.mode-timed { --mode-color: #ef4444; --mode-tint: rgba(239, 68, 68, 0.18); }
+  .card.mode-reverse { --mode-color: #a855f7; --mode-tint: rgba(168, 85, 247, 0.18); }
+  .card.mode-shrink { --mode-color: #14b8a6; --mode-tint: rgba(20, 184, 166, 0.18); }
+  .card.custom { --mode-color: #ec4899; --mode-tint: rgba(236, 72, 153, 0.18); }
+
   .icon {
-    width: 48px;
-    height: 48px;
+    width: 56px;
+    height: 56px;
     display: grid;
     place-items: center;
-    background: var(--surface-strong);
+    background: linear-gradient(135deg, var(--mode-color, var(--accent)) 0%, color-mix(in srgb, var(--mode-color, var(--accent)) 50%, black 50%) 100%);
     border-radius: 50%;
-    color: var(--accent);
-    font-size: 22px;
+    color: white;
+    font-size: 24px;
+    box-shadow: 0 4px 14px color-mix(in srgb, var(--mode-color, var(--accent)) 50%, transparent);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  }
+
+  .chev {
+    color: var(--text-muted);
+    font-size: 14px;
+    transition: transform var(--transition-fast), color var(--transition-fast);
+  }
+
+  .card:hover .chev {
+    color: var(--mode-color, var(--accent));
+    transform: translateX(4px);
   }
 
   h3 {

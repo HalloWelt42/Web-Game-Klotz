@@ -8,9 +8,13 @@ type SfxKind =
   | 'joker'
   | 'earned'
   | 'coin'
-  | 'coin-jingle';
+  | 'coin-jingle'
+  | 'reward-stars';
 
 let ctx: AudioContext | null = null;
+let masterGain: GainNode | null = null;
+let convolver: ConvolverNode | null = null;
+let convolverWet: GainNode | null = null;
 let lastPlaceAt = 0;
 
 function getCtx(): AudioContext | null {
@@ -21,8 +25,32 @@ function getCtx(): AudioContext | null {
       ((window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext);
     if (!Ctor) return null;
     ctx = new Ctor();
+    masterGain = ctx.createGain();
+    masterGain.gain.value = 0.85;
+    masterGain.connect(ctx.destination);
+
+    // Sehr kurzer Reverb fuer Tiefe
+    convolver = ctx.createConvolver();
+    convolver.buffer = makeImpulseResponse(ctx, 0.45, 2);
+    convolverWet = ctx.createGain();
+    convolverWet.gain.value = 0.18;
+    convolver.connect(convolverWet);
+    convolverWet.connect(masterGain);
   }
   return ctx;
+}
+
+function makeImpulseResponse(c: AudioContext, durationSec: number, decay: number): AudioBuffer {
+  const rate = c.sampleRate;
+  const length = Math.floor(rate * durationSec);
+  const impulse = c.createBuffer(2, length, rate);
+  for (let ch = 0; ch < 2; ch++) {
+    const data = impulse.getChannelData(ch);
+    for (let i = 0; i < length; i++) {
+      data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, decay);
+    }
+  }
+  return impulse;
 }
 
 type ToneOpts = {
@@ -30,63 +58,122 @@ type ToneOpts = {
   gain?: number;
   attack?: number;
   decay?: number;
+  release?: number;
   filterFreq?: number;
+  filterQ?: number;
+  detune?: number;
+  pitchEnvelope?: { from: number; to: number; time: number };
+  reverb?: number;
 };
 
 function tone(freq: number, durationMs: number, opts: ToneOpts = {}) {
   const c = getCtx();
-  if (!c) return;
-  const { type = 'sine', gain = 0.08, attack = 0.005, decay = durationMs / 1000, filterFreq } =
-    opts;
+  if (!c || !masterGain) return;
+  const {
+    type = 'sine',
+    gain = 0.08,
+    attack = 0.005,
+    decay = durationMs / 1000,
+    release = 0.04,
+    filterFreq,
+    filterQ = 1,
+    detune = 0,
+    pitchEnvelope,
+    reverb = 0,
+  } = opts;
+  const now = c.currentTime;
   const osc = c.createOscillator();
-  const g = c.createGain();
-  osc.frequency.value = freq;
   osc.type = type;
+  osc.frequency.value = freq;
+  osc.detune.value = detune;
+  if (pitchEnvelope) {
+    osc.frequency.setValueAtTime(pitchEnvelope.from, now);
+    osc.frequency.exponentialRampToValueAtTime(pitchEnvelope.to, now + pitchEnvelope.time);
+  }
+
+  const g = c.createGain();
+  g.gain.setValueAtTime(0.0001, now);
+  g.gain.exponentialRampToValueAtTime(gain, now + attack);
+  g.gain.exponentialRampToValueAtTime(gain * 0.6, now + attack + decay * 0.5);
+  g.gain.exponentialRampToValueAtTime(0.0001, now + attack + decay + release);
+
   let last: AudioNode = osc;
   if (filterFreq) {
     const filter = c.createBiquadFilter();
     filter.type = 'lowpass';
     filter.frequency.value = filterFreq;
-    osc.connect(filter);
+    filter.Q.value = filterQ;
+    last.connect(filter);
     last = filter;
   }
   last.connect(g);
-  g.connect(c.destination);
-  const now = c.currentTime;
-  g.gain.setValueAtTime(0.0001, now);
-  g.gain.exponentialRampToValueAtTime(gain, now + attack);
-  g.gain.exponentialRampToValueAtTime(0.0001, now + attack + decay);
+  g.connect(masterGain);
+  if (reverb > 0 && convolver) {
+    const send = c.createGain();
+    send.gain.value = reverb;
+    g.connect(send);
+    send.connect(convolver);
+  }
+
   osc.start(now);
-  osc.stop(now + attack + decay + 0.05);
+  osc.stop(now + attack + decay + release + 0.02);
 }
 
-function noise(durationMs: number, gainVal = 0.05, filterFreq = 1200) {
+function noise(durationMs: number, gainVal = 0.05, filterFreq = 1200, filterType: BiquadFilterType = 'lowpass') {
   const c = getCtx();
-  if (!c) return;
-  const buffer = c.createBuffer(1, c.sampleRate * (durationMs / 1000), c.sampleRate);
+  if (!c || !masterGain) return;
+  const buffer = c.createBuffer(1, Math.max(1, c.sampleRate * (durationMs / 1000)), c.sampleRate);
   const data = buffer.getChannelData(0);
   for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
   const src = c.createBufferSource();
   src.buffer = buffer;
   const filter = c.createBiquadFilter();
-  filter.type = 'lowpass';
+  filter.type = filterType;
   filter.frequency.value = filterFreq;
+  filter.Q.value = 1.5;
   const g = c.createGain();
-  g.gain.value = gainVal;
   const now = c.currentTime;
   g.gain.setValueAtTime(gainVal, now);
   g.gain.exponentialRampToValueAtTime(0.0001, now + durationMs / 1000);
   src.connect(filter);
   filter.connect(g);
-  g.connect(c.destination);
+  g.connect(masterGain);
   src.start();
 }
 
+function click(intensity = 1.0) {
+  const c = getCtx();
+  if (!c || !masterGain) return;
+  // Sehr kurzer hochfrequenter Transient (Knack)
+  const now = c.currentTime;
+  const buffer = c.createBuffer(1, Math.floor(c.sampleRate * 0.012), c.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < data.length; i++) {
+    const t = i / data.length;
+    data[i] = (Math.random() * 2 - 1) * Math.pow(1 - t, 2);
+  }
+  const src = c.createBufferSource();
+  src.buffer = buffer;
+  const hp = c.createBiquadFilter();
+  hp.type = 'highpass';
+  hp.frequency.value = 2200;
+  hp.Q.value = 0.7;
+  const g = c.createGain();
+  g.gain.value = 0.18 * intensity;
+  src.connect(hp);
+  hp.connect(g);
+  g.connect(masterGain);
+  src.start(now);
+}
+
 function pitchForSize(cells: number): number {
-  const base = 520;
-  const factor = Math.pow(0.93, Math.max(0, cells - 1));
+  // Kleinere Steine knackiger, groessere dumpfer
+  const base = 540;
+  const factor = Math.pow(0.92, Math.max(0, cells - 1));
   return base * factor;
 }
+
+let placeVariant = 0;
 
 export function playSfx(
   kind: SfxKind,
@@ -97,85 +184,297 @@ export function playSfx(
   const now = performance.now();
   switch (kind) {
     case 'place': {
-      if (now - lastPlaceAt < 70) return;
+      if (now - lastPlaceAt < 60) return;
       lastPlaceAt = now;
-      const freq = options.pitch ?? (options.cells ? pitchForSize(options.cells) : 440);
-      tone(freq, 90, { type: 'triangle', gain: 0.07, decay: 0.08 });
-      tone(freq * 0.5, 120, { type: 'sine', gain: 0.04, decay: 0.1 });
+      placeVariant = (placeVariant + 1) % 3;
+      const cells = options.cells ?? 1;
+      const baseFreq = options.pitch ?? pitchForSize(cells);
+
+      // Knack-Komponente: hochfrequenter Transient
+      click(0.7 + Math.min(0.3, cells * 0.05));
+
+      // Tonal-Komponente: warmer Body mit subtiler Pitch-Senke
+      const v = placeVariant;
+      const detune = (v - 1) * 18;
+      tone(baseFreq, 110, {
+        type: 'triangle',
+        gain: 0.1,
+        attack: 0.001,
+        decay: 0.06,
+        release: 0.05,
+        detune,
+        pitchEnvelope: { from: baseFreq * 1.3, to: baseFreq, time: 0.025 },
+        reverb: 0.25,
+      });
+
+      // Sub-Bass fuer Wuchtigkeit, skaliert mit Steingroesse
+      tone(baseFreq * 0.5, 140, {
+        type: 'sine',
+        gain: 0.05 + Math.min(0.07, cells * 0.012),
+        attack: 0.002,
+        decay: 0.1,
+        release: 0.05,
+        filterFreq: 800,
+      });
+
+      // Holziger Anschlag bei groesseren Steinen
+      if (cells >= 4) {
+        noise(28, 0.04, 3000, 'bandpass');
+      }
       break;
     }
     case 'clear': {
       const combo = options.combo ?? 1;
-      const base = 660 + Math.min(8, combo) * 70;
-      const steps = Math.min(5, 2 + combo);
+      const baseRoot = 523;
+      // Aufsteigende Major-Penta-Kette mit Gloss-Schimmer
+      const intervals = [0, 4, 7, 12, 16, 19, 24];
+      const steps = Math.min(intervals.length, 3 + Math.min(4, combo));
+      const transposeSemis = (combo - 1) * 2;
       for (let i = 0; i < steps; i++) {
+        const semis = intervals[i] + transposeSemis;
+        const f = baseRoot * Math.pow(2, semis / 12);
         setTimeout(() => {
-          tone(base * Math.pow(1.18, i), 110, { type: 'sine', gain: 0.07, decay: 0.12 });
+          tone(f, 160, {
+            type: 'triangle',
+            gain: 0.08,
+            attack: 0.005,
+            decay: 0.12,
+            release: 0.08,
+            reverb: 0.4,
+          });
+          tone(f * 2, 80, {
+            type: 'sine',
+            gain: 0.03,
+            attack: 0.002,
+            decay: 0.06,
+            release: 0.03,
+          });
         }, i * 55);
       }
+      // Final-Sparkle
+      setTimeout(() => {
+        tone(baseRoot * 4, 200, {
+          type: 'sine',
+          gain: 0.04,
+          attack: 0.005,
+          decay: 0.18,
+          release: 0.1,
+          reverb: 0.6,
+        });
+      }, steps * 55 + 30);
       break;
     }
     case 'bomb': {
-      noise(400, 0.18, 800);
-      tone(80, 350, { type: 'sawtooth', gain: 0.18, decay: 0.4, filterFreq: 600 });
-      setTimeout(() => tone(55, 220, { type: 'sine', gain: 0.1, decay: 0.25 }), 80);
+      // Tiefer Boom mit Druckwelle
+      noise(420, 0.22, 600, 'lowpass');
+      tone(60, 380, {
+        type: 'sawtooth',
+        gain: 0.22,
+        attack: 0.002,
+        decay: 0.35,
+        release: 0.1,
+        filterFreq: 500,
+        filterQ: 4,
+        pitchEnvelope: { from: 130, to: 38, time: 0.18 },
+        reverb: 0.35,
+      });
+      // Krachen am Anfang
+      click(1.4);
+      setTimeout(() => {
+        tone(45, 280, { type: 'sine', gain: 0.12, decay: 0.28, reverb: 0.4 });
+      }, 60);
+      // Splitter-Schrapnell
+      setTimeout(() => noise(140, 0.05, 4000, 'highpass'), 100);
       break;
     }
     case 'hammer': {
-      tone(180, 50, { type: 'square', gain: 0.12, decay: 0.06 });
-      noise(80, 0.05, 2200);
-      setTimeout(() => tone(120, 80, { type: 'sine', gain: 0.05, decay: 0.1 }), 40);
+      click(1.5);
+      tone(220, 60, {
+        type: 'square',
+        gain: 0.13,
+        attack: 0.001,
+        decay: 0.04,
+        release: 0.04,
+        pitchEnvelope: { from: 380, to: 200, time: 0.02 },
+      });
+      noise(90, 0.06, 1800, 'bandpass');
+      setTimeout(() => {
+        tone(110, 110, { type: 'sine', gain: 0.06, decay: 0.12, reverb: 0.3 });
+      }, 35);
       break;
     }
     case 'joker': {
-      const notes = [880, 1108, 1318, 1760];
-      notes.forEach((f, i) => {
-        setTimeout(() => tone(f, 110, { type: 'sine', gain: 0.06, decay: 0.16 }), i * 45);
+      // Aufsteigender Glitzer-Sweep mit Akkord
+      const root = 880;
+      const arp = [0, 4, 7, 12, 16];
+      arp.forEach((s, i) => {
+        setTimeout(() => {
+          const f = root * Math.pow(2, s / 12);
+          tone(f, 130, {
+            type: 'sine',
+            gain: 0.06,
+            attack: 0.003,
+            decay: 0.1,
+            release: 0.08,
+            reverb: 0.55,
+          });
+          tone(f * 1.5, 80, { type: 'triangle', gain: 0.03, decay: 0.07 });
+        }, i * 38);
       });
-      setTimeout(() => tone(2637, 200, { type: 'triangle', gain: 0.04, decay: 0.25 }), 200);
+      // Gloss-Schwanz
+      setTimeout(() => {
+        tone(2637, 280, {
+          type: 'triangle',
+          gain: 0.04,
+          attack: 0.01,
+          decay: 0.25,
+          release: 0.15,
+          reverb: 0.7,
+        });
+      }, arp.length * 38);
       break;
     }
     case 'earned': {
+      // Levelup-Stinger
       const notes = [523, 659, 784, 1047];
       notes.forEach((f, i) => {
-        setTimeout(() => tone(f, 130, { type: 'triangle', gain: 0.07, decay: 0.18 }), i * 70);
+        setTimeout(() => {
+          tone(f, 140, {
+            type: 'triangle',
+            gain: 0.08,
+            attack: 0.003,
+            decay: 0.1,
+            release: 0.08,
+            reverb: 0.45,
+          });
+          tone(f * 0.5, 90, { type: 'sine', gain: 0.04, decay: 0.08 });
+        }, i * 75);
       });
+      setTimeout(() => click(0.6), notes.length * 75);
       break;
     }
     case 'won': {
+      // Drei-Sterne-Fanfare mit Akkord-Schluss
       const melody = [523, 659, 784, 1047, 1319];
       melody.forEach((f, i) => {
-        setTimeout(() => tone(f, 180, { type: 'triangle', gain: 0.08, decay: 0.22 }), i * 110);
+        setTimeout(() => {
+          tone(f, 220, {
+            type: 'triangle',
+            gain: 0.09,
+            attack: 0.005,
+            decay: 0.16,
+            release: 0.12,
+            reverb: 0.5,
+          });
+          tone(f * 2, 120, { type: 'sine', gain: 0.04, decay: 0.1 });
+        }, i * 130);
+      });
+      // Final-Akkord
+      const finalAt = melody.length * 130;
+      [523, 659, 784, 1047].forEach((f) => {
+        setTimeout(() => {
+          tone(f, 600, {
+            type: 'triangle',
+            gain: 0.05,
+            attack: 0.01,
+            decay: 0.5,
+            release: 0.2,
+            reverb: 0.7,
+          });
+        }, finalAt);
       });
       break;
     }
+    case 'gameover': {
+      const fall = [330, 247, 196, 165];
+      fall.forEach((f, i) => {
+        setTimeout(() => {
+          tone(f, 320, {
+            type: 'sine',
+            gain: 0.07,
+            attack: 0.005,
+            decay: 0.28,
+            release: 0.1,
+            reverb: 0.4,
+          });
+        }, i * 180);
+      });
+      noise(180, 0.04, 800);
+      break;
+    }
     case 'coin': {
-      tone(1760, 35, { type: 'triangle', gain: 0.08, decay: 0.04, attack: 0.001 });
-      setTimeout(() => tone(2349, 90, { type: 'triangle', gain: 0.07, decay: 0.1 }), 30);
-      setTimeout(() => tone(1568, 140, { type: 'sine', gain: 0.04, decay: 0.18 }), 70);
-      noise(40, 0.025, 6000);
+      tone(1760, 40, {
+        type: 'triangle',
+        gain: 0.08,
+        attack: 0.001,
+        decay: 0.04,
+        release: 0.02,
+      });
+      setTimeout(
+        () =>
+          tone(2349, 90, {
+            type: 'triangle',
+            gain: 0.07,
+            attack: 0.001,
+            decay: 0.08,
+            release: 0.03,
+            reverb: 0.4,
+          }),
+        28,
+      );
+      setTimeout(
+        () => tone(1568, 140, { type: 'sine', gain: 0.04, decay: 0.16, reverb: 0.5 }),
+        70,
+      );
+      noise(28, 0.025, 7000, 'highpass');
       break;
     }
     case 'coin-jingle': {
-      const c = getCtx();
-      if (!c) break;
       const seed = options.combo ?? 0;
-      const baseFreqs = [1318, 1568, 1760, 2093, 2349, 2637, 3136];
-      const count = 5 + Math.min(8, seed);
+      const baseFreqs = [1318, 1568, 1760, 2093, 2349, 2637, 3136, 3520];
+      const count = 6 + Math.min(8, seed);
       for (let i = 0; i < count; i++) {
-        const delay = i * 35 + Math.random() * 25;
+        const delay = i * 30 + Math.random() * 28;
         const f = baseFreqs[Math.floor(Math.random() * baseFreqs.length)];
         setTimeout(() => {
-          tone(f, 60, { type: 'triangle', gain: 0.05, decay: 0.07, attack: 0.001 });
-          if (i % 2 === 0) noise(35, 0.018, 7000);
+          tone(f, 70, {
+            type: 'triangle',
+            gain: 0.045,
+            attack: 0.001,
+            decay: 0.05,
+            release: 0.04,
+            reverb: 0.4,
+          });
+          if (i % 2 === 0) noise(28, 0.018, 8000, 'highpass');
         }, delay);
       }
       break;
     }
-    case 'gameover': {
-      tone(330, 280, { type: 'sine', gain: 0.07, decay: 0.3 });
-      setTimeout(() => tone(247, 280, { type: 'sine', gain: 0.07, decay: 0.3 }), 180);
-      setTimeout(() => tone(196, 420, { type: 'sine', gain: 0.07, decay: 0.5 }), 360);
+    case 'reward-stars': {
+      // Drei aufsteigende Star-Pings mit Glanz-Schweif
+      [880, 1175, 1568].forEach((f, i) => {
+        setTimeout(() => {
+          tone(f, 220, {
+            type: 'triangle',
+            gain: 0.09,
+            attack: 0.005,
+            decay: 0.16,
+            release: 0.12,
+            reverb: 0.6,
+          });
+          tone(f * 2, 140, { type: 'sine', gain: 0.04, decay: 0.12, reverb: 0.5 });
+        }, i * 200);
+      });
+      setTimeout(() => {
+        tone(2349, 480, {
+          type: 'triangle',
+          gain: 0.06,
+          attack: 0.02,
+          decay: 0.4,
+          release: 0.2,
+          reverb: 0.8,
+        });
+      }, 600);
       break;
     }
   }
