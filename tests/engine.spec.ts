@@ -52,7 +52,7 @@ describe('engine.tryPlace', () => {
     expect(out!.state.score).toBe(1);
   });
 
-  it('liefert null bei ungueltiger Position', () => {
+  it('liefert null bei ungültiger Position', () => {
     const u1 = pieceById('U1')!;
     const s = withPool(newGame('endless', 1), [
       { piece: u1, consumed: false },
@@ -63,7 +63,7 @@ describe('engine.tryPlace', () => {
     expect(out).toBeNull();
   });
 
-  it('refillt Pool, wenn alle drei verbraucht sind', () => {
+  it('füllt den Pool nach, wenn alle drei verbraucht sind', () => {
     const u1 = pieceById('U1')!;
     let s = withPool(newGame('endless', 1), [
       { piece: u1, consumed: false },
@@ -81,8 +81,8 @@ describe('engine.tryPlace', () => {
     for (let y = 0; y < 10; y++) {
       for (let x = 0; x < 10; x++) board[y][x] = '--piece-blue';
     }
-    // Pro Reihe und Spalte zwei nicht benachbarte Luecken: U1 platzierbar,
-    // aber drei zusammenhaengende Felder gibt es nirgends.
+    // Pro Reihe und Spalte zwei nicht benachbarte Lücken: U1 platzierbar,
+    // aber drei zusammenhängende Felder gibt es nirgends.
     for (let y = 0; y < 10; y++) {
       board[y][y] = null;
       board[y][(y + 5) % 10] = null;
@@ -123,7 +123,7 @@ describe('engine.tryPlace', () => {
       ]),
       board,
     );
-    // Spieler haette eine Bombe als Rettungsanker
+    // Spieler hätte eine Bombe als Rettungsanker
     const stateWithBomb: GameState = {
       ...baseState,
       specials: { bomb: 1, hammer: 0, joker: 0 },
@@ -135,7 +135,7 @@ describe('engine.tryPlace', () => {
 });
 
 describe('engine.undo', () => {
-  it('kann nach einem Zug rueckgaengig machen', () => {
+  it('kann nach einem Zug rückgängig machen', () => {
     const u1 = pieceById('U1')!;
     let s = withPool(newGame('endless', 1), [
       { piece: u1, consumed: false },

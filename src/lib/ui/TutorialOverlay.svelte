@@ -15,25 +15,37 @@
       title: 'Willkommen bei Klotz',
       icon: 'fa-cubes',
       text:
-        'Lege die Steine auf das 10x10-Brett. Volle Reihen und volle Spalten verschwinden. Wenn nichts mehr passt, ist die Partie vorbei.',
+        'Lege Steine auf das Brett. Volle Reihen und volle Spalten lösen sich gleichzeitig auf. Wenn keiner der Steine mehr passt, ist die Partie vorbei.',
     },
     {
       title: 'Drei Steine pro Runde',
       icon: 'fa-shapes',
       text:
-        'Du bekommst immer drei Steine zur Auswahl. Erst wenn alle drei gelegt sind, kommen drei neue.',
+        'Du bekommst immer drei Steine zur Auswahl. Erst wenn alle drei gelegt sind, kommen drei neue. Per Drag & Drop oder über Tab und die Pfeiltasten platzierst du sie.',
     },
     {
-      title: 'Combos zaehlen',
+      title: 'Combos zählen doppelt',
       icon: 'fa-bolt',
       text:
-        'Wenn du mehrere Linien hintereinander raeumst, baust du eine Combo auf. Jede zaehlt mit Multiplikator.',
+        'Räumst du in mehreren Zügen hintereinander Linien, baust du eine Combo auf -- bis zu Multiplikator x3. Einfarbige Linien geben zusätzlich einen Mono-Bonus.',
     },
     {
-      title: 'Hilfen',
-      icon: 'fa-life-ring',
+      title: 'Specials als Lebensretter',
+      icon: 'fa-bomb',
       text:
-        'Pro Partie kannst du einen Zug rueckgaengig machen und einen Stein gegen Punktabzug austauschen. Nutze sie, wenn es eng wird.',
+        'Bei Combo x2 verdienst du eine Bombe (3x3 leeren), bei x3 einen Hammer (eine Zelle), bei x4 einen Joker. Auch alle 5 / 10 / 20 geräumten Linien gibt es einen. Solange Specials im Inventar liegen, kann das Spiel nicht enden.',
+    },
+    {
+      title: 'Modi für jeden Geschmack',
+      icon: 'fa-shapes',
+      text:
+        'Endless für entspanntes Spielen, Tages-Challenge für Vergleiche, Levels mit Sternen, Zeitrennen, Reverse mit vorbelegtem Brett, Shrink mit schrumpfendem Spielfeld. Brettgröße zwischen 6x6 und 12x12 wählbar.',
+    },
+    {
+      title: 'Pause und Fortschritt',
+      icon: 'fa-pause',
+      text:
+        'Esc oder das Pause-Symbol pausiert. Deine Endless-Partie wird automatisch gespeichert -- du kannst später fortsetzen. Statistik, Erfolge und Replays findest du im Hauptmenü.',
     },
   ];
 
@@ -67,9 +79,9 @@
     </div>
   </div>
   {#snippet footer()}
-    <button class="ghost" onclick={back} disabled={step === 0}>Zurueck</button>
+    <button class="ghost" onclick={back} disabled={step === 0}>Zurück</button>
     <button class="primary" onclick={next}>
-      {last ? 'Los gehts' : 'Weiter'}
+      {last ? 'Los geht es' : 'Weiter'}
     </button>
   {/snippet}
 </Modal>

@@ -35,7 +35,7 @@ describe('canPlace', () => {
     expect(canPlace(emptyBoard(), piece, 7, 9)).toBe(true);
   });
 
-  it('lehnt Platzierung ueber Rand ab', () => {
+  it('lehnt Platzierung über den Rand hinaus ab', () => {
     expect(canPlace(emptyBoard(), piece, 8, 0)).toBe(false);
     expect(canPlace(emptyBoard(), piece, -1, 0)).toBe(false);
     expect(canPlace(emptyBoard(), piece, 0, 10)).toBe(false);
@@ -88,7 +88,7 @@ describe('place', () => {
 });
 
 describe('fullRows / fullCols / clearLines', () => {
-  it('erkennt volle Reihen und raeumt sie', () => {
+  it('erkennt volle Reihen und räumt sie', () => {
     let b = emptyBoard();
     b = placeBoard(b, 'I5H', 0, 0);
     b = placeBoard(b, 'I5H', 5, 0);
@@ -100,7 +100,7 @@ describe('fullRows / fullCols / clearLines', () => {
     for (let x = 0; x < 10; x++) expect(result.board[0][x]).toBeNull();
   });
 
-  it('raeumt Reihen und Spalten gleichzeitig, Schnittpunkt nur einmal', () => {
+  it('räumt Reihen und Spalten gleichzeitig, Schnittpunkt nur einmal', () => {
     let b = emptyBoard();
     b = placeBoard(b, 'I5H', 0, 0);
     b = placeBoard(b, 'I5H', 5, 0);
@@ -113,7 +113,7 @@ describe('fullRows / fullCols / clearLines', () => {
     for (let y = 0; y < 10; y++) expect(result.board[y][0]).toBeNull();
   });
 
-  it('zaehlt einfarbige Reihen als Mono-Bonus', () => {
+  it('zählt einfarbige Reihen als Mono-Bonus', () => {
     let b = emptyBoard();
     b = placeBoard(b, 'I5H', 0, 0);
     b = placeBoard(b, 'I5H', 5, 0);
@@ -139,7 +139,7 @@ describe('previewClearedLines', () => {
     expect(preview.rows).toEqual([0]);
   });
 
-  it('liefert leere Listen bei ungueltiger Position', () => {
+  it('liefert leere Listen bei ungültiger Position', () => {
     const preview = previewClearedLines(emptyBoard(), pieceById('I5H')!, 8, 0);
     expect(preview.rows).toHaveLength(0);
     expect(preview.cols).toHaveLength(0);
@@ -172,7 +172,7 @@ describe('isAnyPlaceable', () => {
 });
 
 describe('PIECES Katalog', () => {
-  it('alle Steine haben mindestens eine Zelle und konsistente width/height', () => {
+  it('alle Steine haben mindestens eine Zelle und konsistente Größe', () => {
     for (const p of PIECES) {
       expect(p.cells.length).toBeGreaterThan(0);
       const maxX = Math.max(...p.cells.map(([x]) => x));
