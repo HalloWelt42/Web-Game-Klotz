@@ -90,9 +90,9 @@
   }
 
   li.got .icon.tier-bronze {
-    background: linear-gradient(135deg, #fde68a, #d97706);
-    color: #4a2406;
-    text-shadow: 0 1px 1px rgba(255, 255, 255, 0.55);
+    background: linear-gradient(135deg, #e8a07a, #b87333);
+    color: #3d1206;
+    text-shadow: 0 1px 1px rgba(255, 200, 160, 0.4);
   }
 
   li.got .icon.tier-silver {
@@ -124,8 +124,8 @@
   }
 
   .tier-label.tier-bronze {
-    background: rgba(217, 119, 6, 0.18);
-    color: #d97706;
+    background: rgba(184, 115, 51, 0.18);
+    color: #a0602a;
   }
 
   .tier-label.tier-silver {

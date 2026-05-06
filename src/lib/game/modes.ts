@@ -106,7 +106,7 @@ export const MODES: Record<GameMode, ModeConfig> = {
   timed: {
     id: 'timed',
     label: 'Zeitrennen',
-    description: '180 Sekunden, so viele Punkte wie moeglich.',
+    description: '180 Sekunden, so viele Punkte wie möglich.',
     icon: 'fa-stopwatch',
     boardSize: 10,
     poolFilter: () => true,
@@ -135,7 +135,7 @@ export const MODES: Record<GameMode, ModeConfig> = {
   shrink: {
     id: 'shrink',
     label: 'Shrink',
-    description: 'Brett schrumpft mit der Zeit. Wer am laengsten ueberlebt, gewinnt.',
+    description: 'Brett schrumpft mit der Zeit. Wer am längsten überlebt, gewinnt.',
     icon: 'fa-compress',
     boardSize: 10,
     poolFilter: () => true,

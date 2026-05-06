@@ -101,7 +101,7 @@ export async function saveSettings(settings: Settings): Promise<void> {
 export async function loadProfile(): Promise<Profile> {
   const stored = (await get<Profile>(KEY.profile, store)) ?? null;
   if (stored) return stored;
-  const created: Profile = { pseudonym: 'Klotzkoenig', createdAt: Date.now() };
+  const created: Profile = { pseudonym: 'Klotzkönig', createdAt: Date.now() };
   await set(KEY.profile, created, store);
   return created;
 }

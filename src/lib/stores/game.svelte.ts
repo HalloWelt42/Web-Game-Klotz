@@ -277,7 +277,7 @@ function createGameStore() {
   async function handleGameEnd() {
     if (gameEndHandled) return;
     gameEndHandled = true;
-    // Aktive UI-Zustaende sauber abraeumen, damit nichts haengt
+    // Aktive UI-Zustände sauber abräumen, damit nichts hängt
     drag = { active: false };
     paused = false;
     pendingSpecial = null;
@@ -376,7 +376,7 @@ function createGameStore() {
       }
       void persist();
     }
-    // Nach jedem Use zurueck auf neutral -- der User waehlt explizit neu
+    // Nach jedem Use zurück auf neutral -- der User wählt explizit neu
     pendingSpecial = null;
     return true;
   }
@@ -468,7 +468,7 @@ function createGameStore() {
     dismissGameEnd() {
       // Beendetes Spiel optisch wegklappen, ohne neu zu starten.
       // Status bleibt logisch 'gameover'/'won', sodass keine Logik
-      // ihn wieder spielbar macht. Das Modal schliesst sich, weil wir
+      // ihn wieder spielbar macht. Das Modal schließt sich, weil wir
       // ein internes Flag setzen.
       gameEndDismissed = true;
     },

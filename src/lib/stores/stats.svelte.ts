@@ -18,7 +18,7 @@ function dailyStreakFromScores(scores: { date: string }[]): number {
       streak += 1;
       day.setDate(day.getDate() - 1);
     } else {
-      // Heute zaehlt nicht zwingend mit, also Toleranz von einem Tag
+      // Heute zählt nicht zwingend mit, also Toleranz von einem Tag
       if (i === 0) {
         day.setDate(day.getDate() - 1);
         continue;

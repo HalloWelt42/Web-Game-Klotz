@@ -69,7 +69,7 @@
       <header>
         <h2 id="modal-title">{title}</h2>
         {#if onClose}
-          <button class="ghost close" onclick={onClose} aria-label="Schliessen">
+          <button class="ghost close" onclick={onClose} aria-label="Schließen">
             <i class="fa-solid fa-xmark"></i>
           </button>
         {/if}

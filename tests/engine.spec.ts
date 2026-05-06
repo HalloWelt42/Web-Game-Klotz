@@ -188,7 +188,7 @@ describe('engine end states', () => {
     // simuliere 8 cleared lines via direkten Patch
     state = { ...state, rowsCleared: 8, colsCleared: 0 };
     // Trigger durch tryPlace eines beliebigen U1 auf einem freien Feld
-    // wir setzen dafuer ein leeres Brett mit dem U1-Slot
+    // wir setzen dafür ein leeres Brett mit dem U1-Slot
     const u1 = pieceById('U1')!;
     state = withBoard(
       withPool(state, [
@@ -204,10 +204,10 @@ describe('engine end states', () => {
     expect(out!.state.status).toBe('won');
   });
 
-  it('Lost: Levels mit moves-Limit erschoepft, Goal nicht erreicht', () => {
+  it('Lost: Levels mit moves-Limit erschöpft, Goal nicht erreicht', () => {
     const u1 = pieceById('U1')!;
     let state = newGame('level', 1, 'level-1');
-    // moves-Limit = 12 fuer Level 1, Goal = 80 Punkte
+    // moves-Limit = 12 für Level 1, Goal = 80 Punkte
     state = withPool(state, [
       { piece: u1, consumed: false },
       { piece: u1, consumed: false },
@@ -229,7 +229,7 @@ describe('engine end states', () => {
       { piece: u1, consumed: false },
     ]);
     // Stelle Score knapp unter Goal (80) -- ein U1 (1 Punkt) reicht nicht.
-    // Nutze daher ein groesseres Setup: gib 79 Punkte vor.
+    // Nutze daher ein größeres Setup: gib 79 Punkte vor.
     state = { ...state, score: 79 };
     const out = tryPlace(state, 0, 5, 5);
     expect(out).not.toBeNull();

@@ -139,7 +139,7 @@ export function newGame(
   const cfg = MODES[mode];
   const seed = seedOverride ?? pickModeSeed(mode);
   const rng = makeRng(seed);
-  // Levels haben fixe Setups; alle anderen Modi koennen die Brettgroesse ueberschreiben.
+  // Levels haben fixe Setups; alle anderen Modi können die Brettgröße überschreiben.
   const boardSize = mode === 'level' ? cfg.boardSize : opts.boardSizeOverride ?? cfg.boardSize;
   let setup = cfg.initialBoard(rng, boardSize);
   let goal = cfg.goal ? { ...cfg.goal } : undefined;

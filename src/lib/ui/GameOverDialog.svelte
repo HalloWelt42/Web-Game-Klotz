@@ -1,8 +1,12 @@
 <script lang="ts">
   import { game } from '../stores/game.svelte';
   import { MODES } from '../game/modes';
-  import { withBase } from '../router.svelte';
+  import { router, withBase } from '../router.svelte';
   import Modal from './Modal.svelte';
+
+  const COUNTDOWN_SECONDS = 5;
+  const RING_RADIUS = 15.5;
+  const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
 
   const open = $derived(
     !game.gameEndDismissed &&
@@ -11,13 +15,48 @@
   const won = $derived(game.state.status === 'won');
 
   let copied = $state(false);
+  let secondsLeft = $state(COUNTDOWN_SECONDS);
+  let paused = $state(false);
+  let timerHandle: ReturnType<typeof setInterval> | null = null;
 
-  function restart() {
-    void game.startNew(game.state.mode);
+  $effect(() => {
+    if (open) {
+      startCountdown();
+    } else {
+      stopCountdown();
+    }
+    return () => stopCountdown();
+  });
+
+  function startCountdown() {
+    stopCountdown();
+    secondsLeft = COUNTDOWN_SECONDS;
+    paused = false;
+    timerHandle = setInterval(() => {
+      if (paused) return;
+      secondsLeft -= 1;
+      if (secondsLeft <= 0) {
+        backToMenu();
+      }
+    }, 1000);
   }
 
-  function dismiss() {
+  function stopCountdown() {
+    if (timerHandle !== null) {
+      clearInterval(timerHandle);
+      timerHandle = null;
+    }
+  }
+
+  function backToMenu() {
+    stopCountdown();
     game.dismissGameEnd();
+    router.navigate({ kind: 'home' });
+  }
+
+  function restart() {
+    stopCountdown();
+    void game.startNew(game.state.mode);
   }
 
   function makeUrl(): string {
@@ -30,6 +69,9 @@
   }
 
   async function shareReplay() {
+    // Während des Teilens den Auto-Timer anhalten -- der Nutzer
+    // soll nicht mitten in der Aktion ins Menü geworfen werden.
+    paused = true;
     const url = makeUrl();
     if (typeof navigator !== 'undefined' && (navigator as Navigator & { share?: (data: ShareData) => Promise<void> }).share) {
       try {
@@ -51,9 +93,13 @@
       copied = false;
     }
   }
+
+  const dashLength = $derived(
+    Math.max(0, (secondsLeft / COUNTDOWN_SECONDS) * RING_CIRCUMFERENCE),
+  );
 </script>
 
-<Modal {open} title={won ? 'Geschafft!' : 'Vorbei!'} onClose={dismiss} closeOnBackdrop={false}>
+<Modal {open} title={won ? 'Geschafft!' : 'Vorbei!'} onClose={backToMenu} closeOnBackdrop={false}>
   <div class="content" class:won>
     {#if won}
       <div class="trophy">
@@ -75,27 +121,51 @@
         <dd>{game.highscore}</dd>
       </div>
       <div>
-        <dt>Laengste Combo</dt>
+        <dt>Längste Combo</dt>
         <dd>{game.state.streak}</dd>
       </div>
       <div>
-        <dt>Zuege</dt>
+        <dt>Züge</dt>
         <dd>{game.state.movesCount}</dd>
       </div>
     </dl>
   </div>
   {#snippet footer()}
-    <button class="ghost" onclick={dismiss}>
-      Schliessen
-    </button>
-    <button class="ghost" onclick={shareReplay}>
-      <i class="fa-solid fa-share-nodes"></i>
-      {copied ? 'Kopiert!' : 'Replay teilen'}
-    </button>
-    <button class="primary" onclick={restart}>
-      <i class="fa-solid fa-rotate-right"></i>
-      Neue Partie
-    </button>
+    <div class="footer-row">
+      <div
+        class="countdown"
+        class:paused
+        aria-live="polite"
+        aria-label={paused ? 'Auto-Timer angehalten' : `Automatisch zurück zum Menü in ${secondsLeft} Sekunden`}
+      >
+        <svg viewBox="0 0 36 36" aria-hidden="true">
+          <circle class="ring-bg" cx="18" cy="18" r={RING_RADIUS}></circle>
+          <circle
+            class="ring-fg"
+            cx="18"
+            cy="18"
+            r={RING_RADIUS}
+            stroke-dasharray={`${dashLength} ${RING_CIRCUMFERENCE}`}
+            transform="rotate(-90 18 18)"
+          ></circle>
+        </svg>
+        <span class="countdown-num">{paused ? '--' : secondsLeft}</span>
+      </div>
+      <div class="actions">
+        <button class="ghost" onclick={backToMenu}>
+          <i class="fa-solid fa-house"></i>
+          Hauptmenü
+        </button>
+        <button class="ghost" onclick={shareReplay}>
+          <i class="fa-solid fa-share-nodes"></i>
+          {copied ? 'Kopiert!' : 'Replay teilen'}
+        </button>
+        <button class="primary" onclick={restart}>
+          <i class="fa-solid fa-rotate-right"></i>
+          Neue Partie
+        </button>
+      </div>
+    </div>
   {/snippet}
 </Modal>
 
@@ -159,6 +229,69 @@
     font-variant-numeric: tabular-nums;
   }
 
+  .footer-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+  }
+
+  .countdown {
+    position: relative;
+    width: 44px;
+    height: 44px;
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+  }
+
+  .countdown svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .ring-bg {
+    fill: none;
+    stroke: var(--border);
+    stroke-width: 3;
+  }
+
+  .ring-fg {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 3;
+    stroke-linecap: round;
+    transition: stroke-dasharray 1s linear;
+  }
+
+  .countdown.paused .ring-fg {
+    stroke: var(--text-muted);
+    transition: none;
+  }
+
+  .countdown-num {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .countdown.paused .countdown-num {
+    color: var(--text-muted);
+  }
+
+  .actions {
+    display: flex;
+    gap: 8px;
+    flex: 1;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+
   @keyframes bounceIn {
     0% {
       transform: scale(0);
@@ -170,6 +303,16 @@
     }
     100% {
       transform: scale(1);
+    }
+  }
+
+  @media (max-width: 480px) {
+    .actions {
+      gap: 6px;
+    }
+    .actions button {
+      padding: 8px 10px;
+      font-size: 12px;
     }
   }
 </style>

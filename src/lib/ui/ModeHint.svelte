@@ -24,23 +24,23 @@
     },
     level: {
       title: 'Levels',
-      tip: 'Erreiche das Punktziel innerhalb der Zugzahl. Block-Felder sind nicht raeumbar, Eis-Felder tauen, wenn die Reihe oder Spalte frei wird.',
-      controls: ['Punkte-Ziel', 'Begrenzte Zuege', 'Block + Eis im Brett'],
+      tip: 'Erreiche das Punktziel innerhalb der Zugzahl. Block-Felder sind nicht räumbar, Eis-Felder tauen, wenn die Reihe oder Spalte frei wird.',
+      controls: ['Punkte-Ziel', 'Begrenzte Züge', 'Block + Eis im Brett'],
     },
     timed: {
       title: 'Zeitrennen',
-      tip: 'Drei Minuten, so viele Punkte wie moeglich. Combos zaehlen doppelt, weil Zeit knapp ist.',
+      tip: 'Drei Minuten, so viele Punkte wie möglich. Combos zählen doppelt, weil Zeit knapp ist.',
       controls: ['180 Sekunden', 'Specials gelegentlich im Pool', 'Combo-Multiplikator bis x3'],
     },
     reverse: {
       title: 'Reverse',
-      tip: 'Brett startet voll. Ziel: 8 Linien raeumen, bevor dir der Pool ausgeht. Specials helfen oeffter.',
-      controls: ['Initial vorbelegtes Brett', 'Ziel: 8 geraumte Linien', 'Specials im Pool'],
+      tip: 'Brett startet voll. Ziel: 8 Linien räumen, bevor dir der Pool ausgeht. Specials helfen öfter.',
+      controls: ['Initial vorbelegtes Brett', 'Ziel: 8 geräumte Linien', 'Specials im Pool'],
     },
     shrink: {
       title: 'Shrink',
-      tip: 'Brett schrumpft alle 12 Zuege um eine Reihe nach innen. Wer bleibt am laengsten am Leben?',
-      controls: ['Brettrand wird zu Block', 'Zuegen-Druck baut sich auf'],
+      tip: 'Brett schrumpft alle 12 Züge um eine Reihe nach innen. Wer bleibt am längsten am Leben?',
+      controls: ['Brettrand wird zu Block', 'Zug-Druck baut sich auf'],
     },
   };
 

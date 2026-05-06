@@ -8,13 +8,14 @@
 
   type Props = {
     open: boolean;
+    inline?: boolean;
     onClose: () => void;
     onStartMode: (mode: GameMode) => void;
     onStartLevel: (id: string) => void;
     onStartSeed: (seed: number, raw: string) => void;
   };
 
-  let { open, onClose, onStartMode, onStartLevel, onStartSeed }: Props = $props();
+  let { open, inline = false, onClose, onStartMode, onStartLevel, onStartSeed }: Props = $props();
 
   type Step = 1 | 2 | 3;
   let step = $state<Step>(1);
@@ -120,7 +121,7 @@
   });
 </script>
 
-<Modal {open} title="Neue Partie" {onClose}>
+<Modal {open} {inline} title="Neue Partie" {onClose}>
   <div class="wizard">
     <div class="steps" role="list">
       <span class="step" class:active={step === 1} class:done={step > 1}>1. Modus</span>
@@ -261,7 +262,7 @@
     {#if step > 1}
       <button class="ghost" type="button" onclick={back}>
         <i class="fa-solid fa-arrow-left"></i>
-        Zurueck
+        Zurück
       </button>
     {/if}
     {#if step === 3}
@@ -503,7 +504,7 @@
     color: var(--border);
   }
 
-  /* Brettgroessen */
+  /* Brettgrößen */
   .size-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);

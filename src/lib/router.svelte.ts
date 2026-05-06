@@ -34,7 +34,8 @@ export type Route =
   | { kind: 'replays' }
   | { kind: 'settings' }
   | { kind: 'help' }
-  | { kind: 'donate' };
+  | { kind: 'donate' }
+  | { kind: 'new-game' };
 
 const VALID_SIZES: BoardSize[] = [6, 8, 10, 12];
 
@@ -82,6 +83,7 @@ export function parseRoute(pathname: string): Route {
   if (path === '/settings') return { kind: 'settings' };
   if (path === '/help') return { kind: 'help' };
   if (path === '/danke' || path === '/donate') return { kind: 'donate' };
+  if (path === '/neue-partie' || path === '/new-game') return { kind: 'new-game' };
 
   if (path in PATH_TO_MODE) {
     return { kind: 'mode', mode: PATH_TO_MODE[path] };
@@ -169,6 +171,8 @@ export function routeToPath(route: Route): string {
       return '/help';
     case 'donate':
       return '/danke';
+    case 'new-game':
+      return '/neue-partie';
   }
 }
 

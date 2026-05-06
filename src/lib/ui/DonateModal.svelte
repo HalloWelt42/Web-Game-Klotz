@@ -60,7 +60,7 @@
       <i class="fa-solid fa-heart heart"></i>
       <p>
         Klotz ist ein Hobby-Projekt -- lokal, ohne Tracker, ohne Werbung. Wenn dir das
-        Spiel Freude macht, freue ich mich ueber einen virtuellen Kaffee oder eine
+        Spiel Freude macht, freue ich mich über einen virtuellen Kaffee oder eine
         Krypto-Spende.
       </p>
     </div>
@@ -70,7 +70,7 @@
       <span>Ko-fi -- Kauf mir einen Kaffee</span>
     </a>
 
-    <p class="crypto-label">Oder per Kryptowaehrung:</p>
+    <p class="crypto-label">Oder per Kryptowährung:</p>
 
     <div class="tabs" role="tablist">
       {#each Object.entries(COINS) as [kind, coin] (kind)}
@@ -94,7 +94,7 @@
         {#if active === (kind as CryptoKind)}
           <div class="box">
             <div class="qr" style:--coin-color={coin.color}>
-              <img src={coin.qr} alt={`QR-Code fuer ${coin.label}`} />
+              <img src={coin.qr} alt={`QR-Code für ${coin.label}`} />
             </div>
             <div class="details">
               <p class="name">{coin.label}</p>
@@ -117,7 +117,7 @@
       {/each}
     </div>
 
-    <p class="thanks">Danke fuer deine Unterstuetzung!</p>
+    <p class="thanks">Danke für deine Unterstützung!</p>
   </div>
 </Modal>
 

@@ -56,7 +56,7 @@
       data-kind={item.kind}
       disabled={count === 0}
       onclick={() => toggle(item.kind)}
-      aria-label={`${item.label} -- ${count} verfuegbar`}
+      aria-label={`${item.label} -- ${count} verfügbar`}
     >
       <div class="icon-wrap">
         <i class={`fa-solid ${item.icon}`}></i>

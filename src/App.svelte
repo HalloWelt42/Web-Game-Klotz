@@ -39,7 +39,6 @@
   let cellSize = $state(36);
   const cellGap = 4;
 
-  let showWizard = $state(false);
   let modeHint = $state<GameMode | null>(null);
   let showLevelPicker = $state(false);
   let showSurrenderConfirm = $state(false);
@@ -49,7 +48,7 @@
   async function applyRouteAction() {
     const r = router.route;
     if (r.kind === 'mode') {
-      // Bereits laufende Partie im selben Modus nicht ueberschreiben
+      // Bereits laufende Partie im selben Modus nicht überschreiben
       const sizeOk = !r.size || settings.value.boardSize === r.size;
       if (
         game.state.mode === r.mode &&
@@ -94,6 +93,10 @@
   $effect(() => {
     const r = router.route;
     showLevelPicker = r.kind === 'levels';
+    if (initialised && r.kind === 'new-game') {
+      // Wenn aus dem Neue-Partie-Menü ein Spiel gestartet wird,
+      // navigiert pickMode/pickLevel weiter -- hier nichts tun
+    }
     if (
       initialised &&
       (r.kind === 'mode' || r.kind === 'level' || r.kind === 'seed' || r.kind === 'replay')
@@ -148,10 +151,11 @@
       r.kind === 'settings' ||
       r.kind === 'help' ||
       r.kind === 'levels' ||
-      r.kind === 'donate'
+      r.kind === 'donate' ||
+      r.kind === 'new-game'
     ) {
-      // Wenn eine Partie laeuft, zurueck zum Brett
-      // Sonst zurueck zum Hauptmenue
+      // Wenn eine Partie läuft, zurück zum Brett
+      // Sonst zurück zum Hauptmenü
       if (game.state.status === 'running' && game.state.movesCount > 0) {
         router.navigate({ kind: 'mode', mode: game.state.mode });
       } else {
@@ -161,7 +165,7 @@
   }
 
   function openOverlay(
-    kind: 'stats' | 'achievements' | 'replays' | 'settings' | 'levels' | 'donate',
+    kind: 'stats' | 'achievements' | 'replays' | 'settings' | 'levels' | 'donate' | 'new-game',
   ) {
     router.navigate({ kind });
   }
@@ -172,6 +176,10 @@
       return;
     }
     router.navigate({ kind: 'mode', mode });
+  }
+
+  function openNewGame() {
+    router.navigate({ kind: 'new-game' });
   }
 
   function pickLevel(levelId: string) {
@@ -273,9 +281,9 @@
     // Wenn ein Modal/Overlay offen ist, hat es Vorrang
     const r = router.route;
     if (
-      showWizard ||
       showLevelPicker ||
       showSurrenderConfirm ||
+      r.kind === 'new-game' ||
       r.kind === 'stats' ||
       r.kind === 'achievements' ||
       r.kind === 'replays' ||
@@ -301,7 +309,7 @@
 </script>
 
 <Topbar
-  onNewGame={() => (showWizard = true)}
+  onNewGame={openNewGame}
   onSurrender={() => (showSurrenderConfirm = true)}
   onOpenAchievements={() => openOverlay('achievements')}
   onOpenReplays={() => openOverlay('replays')}
@@ -319,10 +327,20 @@
     router.route.kind === 'replays' ||
     router.route.kind === 'settings' ||
     router.route.kind === 'donate' ||
-    router.route.kind === 'help'}
+    router.route.kind === 'help' ||
+    router.route.kind === 'new-game'}
 >
   {#if router.route.kind === 'home'}
-    <MainMenu onStartNew={() => (showWizard = true)} />
+    <MainMenu onStartNew={openNewGame} />
+  {:else if router.route.kind === 'new-game'}
+    <NewGameWizard
+      open={true}
+      inline
+      onClose={closeOverlay}
+      onStartMode={(m) => pickMode(m)}
+      onStartLevel={(id) => pickLevel(id)}
+      onStartSeed={(seed, raw) => startCustomSeed(seed, raw)}
+    />
   {:else if router.route.kind === 'stats'}
     <StatsModal open inline onClose={closeOverlay} />
   {:else if router.route.kind === 'achievements'}
@@ -363,14 +381,6 @@
 
 <GameOverDialog />
 
-<NewGameWizard
-  open={showWizard}
-  onClose={() => (showWizard = false)}
-  onStartMode={(m) => pickMode(m)}
-  onStartLevel={(id) => pickLevel(id)}
-  onStartSeed={(seed, raw) => startCustomSeed(seed, raw)}
-/>
-
 <ModeHint open={modeHint !== null} mode={modeHint} onClose={() => (modeHint = null)} />
 
 <LevelPicker
@@ -383,7 +393,7 @@
   onResume={() => game.unpause()}
   onNew={() => {
     game.unpause();
-    showWizard = true;
+    openNewGame();
   }}
 />
 
@@ -393,7 +403,7 @@
   onClose={() => (showSurrenderConfirm = false)}
 >
   <p>
-    Die laufende Partie wird sofort als beendet gewertet. Dein Punktestand zaehlt zur Statistik
+    Die laufende Partie wird sofort als beendet gewertet. Dein Punktestand zählt zur Statistik
     und wird als Replay gespeichert.
   </p>
   {#snippet footer()}

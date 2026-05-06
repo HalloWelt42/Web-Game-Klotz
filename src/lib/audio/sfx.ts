@@ -29,7 +29,7 @@ function getCtx(): AudioContext | null {
     masterGain.gain.value = 0.85;
     masterGain.connect(ctx.destination);
 
-    // Sehr kurzer Reverb fuer Tiefe
+    // Sehr kurzer Reverb für Tiefe
     convolver = ctx.createConvolver();
     convolver.buffer = makeImpulseResponse(ctx, 0.45, 2);
     convolverWet = ctx.createGain();
@@ -167,7 +167,7 @@ function click(intensity = 1.0) {
 }
 
 function pitchForSize(cells: number): number {
-  // Kleinere Steine knackiger, groessere dumpfer
+  // Kleinere Steine knackiger, größere dumpfer
   const base = 540;
   const factor = Math.pow(0.92, Math.max(0, cells - 1));
   return base * factor;
@@ -207,7 +207,7 @@ export function playSfx(
         reverb: 0.25,
       });
 
-      // Sub-Bass fuer Wuchtigkeit, skaliert mit Steingroesse
+      // Sub-Bass für Wuchtigkeit, skaliert mit Steingröße
       tone(baseFreq * 0.5, 140, {
         type: 'sine',
         gain: 0.05 + Math.min(0.07, cells * 0.012),
@@ -217,7 +217,7 @@ export function playSfx(
         filterFreq: 800,
       });
 
-      // Holziger Anschlag bei groesseren Steinen
+      // Holziger Anschlag bei größeren Steinen
       if (cells >= 4) {
         noise(28, 0.04, 3000, 'bandpass');
       }
@@ -269,7 +269,7 @@ export function playSfx(
       if (!c || !masterGain) break;
       const now = c.currentTime;
 
-      // Phase 1: Zuendung -- harter hochfrequenter Crack
+      // Phase 1: Zündung -- harter hochfrequenter Crack
       click(2.0);
       noise(60, 0.18, 6000, 'bandpass');
 
@@ -299,7 +299,7 @@ export function playSfx(
       punch.start(now);
       punch.stop(now + 0.22);
 
-      // Phase 3: Sub-Boom -- tiefer Sweep mit Saettigung
+      // Phase 3: Sub-Boom -- tiefer Sweep mit Sättigung
       tone(80, 600, {
         type: 'sawtooth',
         gain: 0.28,

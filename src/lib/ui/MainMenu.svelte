@@ -18,14 +18,6 @@
 </script>
 
 <section class="menu">
-  <header class="brand">
-    <div class="logo" aria-hidden="true">
-      <i class="fa-solid fa-cubes"></i>
-    </div>
-    <h1>Klotz</h1>
-    <p class="claim">Block-Puzzle. Lokal, offline, ohne Tracker.</p>
-  </header>
-
   <div class="primary-actions">
     {#if hasResume}
       <button
@@ -132,44 +124,6 @@
     width: 100%;
     max-width: 540px;
     margin: 0 auto;
-  }
-
-  .brand {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    text-align: center;
-  }
-
-  .logo {
-    width: 88px;
-    height: 88px;
-    display: grid;
-    place-items: center;
-    background: linear-gradient(135deg, var(--accent), var(--accent-strong));
-    border-radius: 24px;
-    color: white;
-    font-size: 38px;
-    box-shadow: 0 14px 32px color-mix(in srgb, var(--accent) 45%, transparent),
-      inset 0 -3px 0 rgba(0, 0, 0, 0.18),
-      inset 0 2px 0 rgba(255, 255, 255, 0.3);
-    transform: rotate(-3deg);
-    margin-bottom: 6px;
-  }
-
-  h1 {
-    margin: 0;
-    font-size: 38px;
-    font-weight: 900;
-    letter-spacing: 0.04em;
-    color: var(--text);
-  }
-
-  .claim {
-    margin: 0;
-    font-size: 13px;
-    color: var(--text-muted);
   }
 
   .primary-actions {

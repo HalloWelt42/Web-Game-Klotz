@@ -53,7 +53,7 @@
   const slots = $derived(game.state.pool);
 </script>
 
-<div class="pool" aria-label="Verfuegbare Steine">
+<div class="pool" aria-label="Verfügbare Steine">
   {#each slots as slot, i}
     {@const slotIndex = i as 0 | 1 | 2}
     <button

@@ -13,8 +13,8 @@ export type Level = {
 export const LEVELS: Level[] = [
   {
     id: 'level-1',
-    title: 'Aufwaermrunde',
-    description: 'Erreiche 80 Punkte in 12 Zuegen.',
+    title: 'Aufwärmrunde',
+    description: 'Erreiche 80 Punkte in 12 Zügen.',
     goal: { points: 80 },
     movesLimit: 12,
     blockCount: 0,
@@ -23,7 +23,7 @@ export const LEVELS: Level[] = [
   {
     id: 'level-2',
     title: 'Erste Hindernisse',
-    description: '160 Punkte in 14 Zuegen, zwei Blocks im Brett.',
+    description: '160 Punkte in 14 Zügen, zwei Blocks im Brett.',
     goal: { points: 160 },
     movesLimit: 14,
     blockCount: 2,
@@ -32,7 +32,7 @@ export const LEVELS: Level[] = [
   {
     id: 'level-3',
     title: 'Eisbrecher',
-    description: '5 Linien raeumen in 16 Zuegen, mit Eisfeldern.',
+    description: '5 Linien räumen in 16 Zügen, mit Eisfeldern.',
     goal: { clears: 5 },
     movesLimit: 16,
     blockCount: 0,
@@ -41,7 +41,7 @@ export const LEVELS: Level[] = [
   {
     id: 'level-4',
     title: 'Mauerbauer',
-    description: '250 Punkte in 18 Zuegen, vier Blocks und zwei Eis.',
+    description: '250 Punkte in 18 Zügen, vier Blocks und zwei Eis.',
     goal: { points: 250 },
     movesLimit: 18,
     blockCount: 4,
@@ -50,7 +50,7 @@ export const LEVELS: Level[] = [
   {
     id: 'level-5',
     title: 'Combo-Sucher',
-    description: '8 Linien raeumen in 20 Zuegen.',
+    description: '8 Linien räumen in 20 Zügen.',
     goal: { clears: 8 },
     movesLimit: 20,
     blockCount: 2,
@@ -59,7 +59,7 @@ export const LEVELS: Level[] = [
   {
     id: 'level-6',
     title: 'Gut gemischt',
-    description: '400 Punkte in 22 Zuegen.',
+    description: '400 Punkte in 22 Zügen.',
     goal: { points: 400 },
     movesLimit: 22,
     blockCount: 5,
@@ -68,7 +68,7 @@ export const LEVELS: Level[] = [
   {
     id: 'level-7',
     title: 'Spaltenmacher',
-    description: '6 Spalten in 22 Zuegen raeumen.',
+    description: '6 Spalten in 22 Zügen räumen.',
     goal: { cols: 6 },
     movesLimit: 22,
     blockCount: 4,
@@ -77,7 +77,7 @@ export const LEVELS: Level[] = [
   {
     id: 'level-8',
     title: 'Belastungstest',
-    description: '600 Punkte in 25 Zuegen, viele Hindernisse.',
+    description: '600 Punkte in 25 Zügen, viele Hindernisse.',
     goal: { points: 600 },
     movesLimit: 25,
     blockCount: 7,
@@ -85,8 +85,8 @@ export const LEVELS: Level[] = [
   },
   {
     id: 'level-9',
-    title: 'Reihenkoenig',
-    description: '12 Linien raeumen in 24 Zuegen.',
+    title: 'Reihenkönig',
+    description: '12 Linien räumen in 24 Zügen.',
     goal: { clears: 12 },
     movesLimit: 24,
     blockCount: 6,
@@ -95,7 +95,7 @@ export const LEVELS: Level[] = [
   {
     id: 'level-10',
     title: 'Endspiel',
-    description: '900 Punkte in 28 Zuegen, brutaler Aufbau.',
+    description: '900 Punkte in 28 Zügen, brutaler Aufbau.',
     goal: { points: 900 },
     movesLimit: 28,
     blockCount: 8,

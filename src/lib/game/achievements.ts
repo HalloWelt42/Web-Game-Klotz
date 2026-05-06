@@ -44,7 +44,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: 'combo-5',
-    title: 'Combo Fuenfer',
+    title: 'Combo Fünfer',
     description: 'Erreiche eine Combo von 5.',
     icon: 'fa-bolt-lightning',
     tier: 'silver',
@@ -76,7 +76,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: 'score-5000',
-    title: 'Fuenftausend',
+    title: 'Fünftausend',
     description: 'Erreiche 5000 Punkte in einer Partie.',
     icon: 'fa-trophy',
     tier: 'gold',
@@ -117,7 +117,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   {
     id: 'ten-games',
     title: 'Stammgast',
-    description: 'Spiele 10 vollstaendige Partien.',
+    description: 'Spiele 10 vollständige Partien.',
     icon: 'fa-gamepad',
     tier: 'bronze',
     test: ({ stats }) => stats.gamesPlayed >= 10,
@@ -125,7 +125,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   {
     id: 'fifty-games',
     title: 'Viel-Spieler',
-    description: 'Spiele 50 vollstaendige Partien.',
+    description: 'Spiele 50 vollständige Partien.',
     icon: 'fa-medal',
     tier: 'silver',
     test: ({ stats }) => stats.gamesPlayed >= 50,
@@ -133,7 +133,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   {
     id: 'hundred-games',
     title: 'Hundertfach',
-    description: 'Spiele 100 vollstaendige Partien.',
+    description: 'Spiele 100 vollständige Partien.',
     icon: 'fa-award',
     tier: 'gold',
     test: ({ stats }) => stats.gamesPlayed >= 100,
@@ -141,7 +141,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   {
     id: 'daily-survivor',
     title: 'Daily-Survivor',
-    description: 'Schliesse deine erste Tages-Challenge ab.',
+    description: 'Schließe deine erste Tages-Challenge ab.',
     icon: 'fa-calendar-check',
     tier: 'bronze',
     test: ({ stats }) => stats.dailyScores.length >= 1,
@@ -172,8 +172,8 @@ export const ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: 'level-clear-5',
-    title: 'Level-Gaenger',
-    description: 'Schliesse 5 Levels ab.',
+    title: 'Level-Gänger',
+    description: 'Schließe 5 Levels ab.',
     icon: 'fa-flag',
     tier: 'silver',
     test: ({ stats }) => stats.completedLevels.length >= 5,
@@ -181,7 +181,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   {
     id: 'level-clear-all',
     title: 'Endspiel',
-    description: 'Schliesse alle 10 Levels ab.',
+    description: 'Schließe alle 10 Levels ab.',
     icon: 'fa-trophy',
     tier: 'gold',
     test: ({ stats }) => stats.completedLevels.length >= 10,

@@ -29,7 +29,7 @@
           <strong>{game.state.score}</strong>
         </div>
         <div>
-          <span class="lbl">Zuege</span>
+          <span class="lbl">Züge</span>
           <strong>{game.state.movesCount}</strong>
         </div>
         <div>

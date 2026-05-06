@@ -53,7 +53,7 @@
         <li>
           <div class="meta">
             <strong>{MODES[r.mode].label}</strong>
-            <span class="moves">{r.moves.length} Zuege</span>
+            <span class="moves">{r.moves.length} {r.moves.length === 1 ? 'Zug' : 'Züge'}</span>
           </div>
           <button class="ghost" onclick={() => copyUrl(r)}>
             <i class="fa-solid fa-link"></i>

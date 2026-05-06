@@ -111,8 +111,8 @@
   }
 
   li.got .icon.tier-bronze {
-    background: linear-gradient(135deg, #fde68a, #d97706);
-    color: #4a2406;
+    background: linear-gradient(135deg, #e8a07a, #b87333);
+    color: #3d1206;
   }
 
   li.got .icon.tier-silver {

@@ -59,7 +59,7 @@
         >
           <option value="default">Standard</option>
           <option value="warm">Warm</option>
-          <option value="cool">Kuehl</option>
+          <option value="cool">Kühl</option>
           <option value="forest">Wald</option>
           <option value="winter">Winter</option>
           <option value="halloween">Halloween</option>
@@ -72,7 +72,7 @@
           onchange={(e) =>
             settings.update({ colorblind: (e.currentTarget as HTMLInputElement).checked })}
         />
-        <span>Farbblind-Modus (Steine zusaetzlich gemustert)</span>
+        <span>Farbblind-Modus (Steine zusätzlich gemustert)</span>
       </label>
     </section>
 
@@ -92,7 +92,7 @@
           checked={settings.value.haptics}
           onchange={(e) => settings.update({ haptics: (e.currentTarget as HTMLInputElement).checked })}
         />
-        <span>Vibration auf Mobilgeraeten</span>
+        <span>Vibration auf Mobilgeräten</span>
       </label>
     </section>
 
@@ -105,14 +105,14 @@
       {#if !confirmReset}
         <button class="ghost danger" onclick={() => (confirmReset = true)}>
           <i class="fa-solid fa-trash"></i>
-          Alle Daten loeschen
+          Alle Daten löschen
         </button>
       {:else}
         <div class="confirm">
-          <p>Wirklich alles loeschen? Highscore, Statistik, Einstellungen.</p>
+          <p>Wirklich alles löschen? Highscore, Statistik, Einstellungen.</p>
           <div class="confirm-actions">
             <button class="ghost" onclick={() => (confirmReset = false)}>Abbrechen</button>
-            <button class="primary danger" onclick={resetAll}>Ja, loeschen</button>
+            <button class="primary danger" onclick={resetAll}>Ja, löschen</button>
           </div>
         </div>
       {/if}

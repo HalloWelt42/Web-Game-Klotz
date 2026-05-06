@@ -18,7 +18,7 @@
   }
 </script>
 
-<Modal {open} title="Level waehlen" {onClose}>
+<Modal {open} title="Level wählen" {onClose}>
   <div class="meta">
     <strong>{stats.value.completedLevels.length}</strong> von {LEVELS.length} abgeschlossen
   </div>

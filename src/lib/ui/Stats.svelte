@@ -76,19 +76,19 @@
         <dd>{stats.value.totalPoints}</dd>
       </div>
       <div>
-        <dt>Hoechste Combo</dt>
+        <dt>Höchste Combo</dt>
         <dd>{stats.value.highestCombo}</dd>
       </div>
       <div>
-        <dt>Laengste Streak</dt>
+        <dt>Längste Streak</dt>
         <dd>{stats.value.longestStreak}</dd>
       </div>
       <div>
-        <dt>Reihen geraumt</dt>
+        <dt>Reihen geräumt</dt>
         <dd>{stats.value.rowsCleared}</dd>
       </div>
       <div>
-        <dt>Spalten geraumt</dt>
+        <dt>Spalten geräumt</dt>
         <dd>{stats.value.colsCleared}</dd>
       </div>
       <div>

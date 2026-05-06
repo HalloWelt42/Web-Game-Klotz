@@ -46,9 +46,9 @@
   }
 </script>
 
-<Modal {open} title="Modus waehlen" {onClose}>
-  <div class="size-row" role="radiogroup" aria-label="Brettgroesse">
-    <span class="size-label">Brettgroesse</span>
+<Modal {open} title="Modus wählen" {onClose}>
+  <div class="size-row" role="radiogroup" aria-label="Brettgröße">
+    <span class="size-label">Brettgröße</span>
     {#each sizes as s}
       <button
         type="button"
@@ -64,7 +64,7 @@
   </div>
 
   <p class="size-hint">
-    Gilt fuer Endless, Daily, Zeitrennen, Reverse und Shrink. Levels haben fixe Brettgroessen.
+    Gilt für Endless, Daily, Zeitrennen, Reverse und Shrink. Levels haben fixe Brettgrößen.
   </p>
 
   <div class="grid">
