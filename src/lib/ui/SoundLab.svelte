@@ -35,7 +35,7 @@
     {
       id: 1,
       label: 'V1 Soft-Hybrid',
-      tag: 'aktuell im Spiel',
+      tag: 'körperhaft',
       summary:
         'Click + warmer Triangle-Body mit Pitch-Senke + Sub-Bass + leichter Wood-Hauch bei großen Steinen. Modern, körperhaft.',
     },
@@ -70,7 +70,7 @@
     {
       id: 6,
       label: 'V6 Pop / Bubble',
-      tag: 'verspielt',
+      tag: 'aktuell im Spiel',
       summary:
         'Kein Click. Triangle-Body mit aufsteigender Pitch-Kurve (Bow von tief nach hoch). Spielerisch, fast Toy-App.',
     },

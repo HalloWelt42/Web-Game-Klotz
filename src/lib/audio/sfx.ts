@@ -342,10 +342,9 @@ export function playSfx(
       if (now - lastPlaceAt < 60) return;
       lastPlaceAt = now;
       const cells = options.cells ?? 1;
-      // Standard: Variante 1 (Soft-Hybrid). Wird über das Sound-Lab
-      // ausgewählt -- aktuelle Konfiguration wird hier zentral umgestellt,
-      // sobald der Nutzer sich auf eine Variante festlegt.
-      placeV1SoftHybrid(cells);
+      // Aktive Place-Variante: V6 Pop/Bubble. Alle anderen bleiben im
+      // Sound-Lab unter /sound-lab fuer A/B-Vergleiche verfügbar.
+      placeV6PopBubble(cells);
       break;
     }
     case 'clear': {
