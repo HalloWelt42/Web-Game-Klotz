@@ -320,11 +320,6 @@
 <Topbar
   onNewGame={openNewGame}
   onSurrender={() => (showSurrenderConfirm = true)}
-  onOpenAchievements={() => openOverlay('achievements')}
-  onOpenReplays={() => openOverlay('replays')}
-  onOpenStats={() => openOverlay('stats')}
-  onOpenDonate={() => openOverlay('donate')}
-  onOpenSettings={() => openOverlay('settings')}
 />
 
 <main
