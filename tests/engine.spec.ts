@@ -359,6 +359,25 @@ describe('engine.shrink', () => {
     expect(placeable).toBe(true);
   });
 
+  it('Game Over sobald Innenfläche 2x2 erreicht (10x10 -> Ring 4)', () => {
+    // 10x10, ringCap = (10-2)/2 = 4. Bei movesCount 24 (= 4 * SHRINK_INTERVAL=6)
+    // springt der Ring von 3 auf 4 -- ringCap erreicht -> Game Over.
+    const u1 = pieceById('U1')!;
+    let s: GameState = {
+      ...newGame('shrink', 1),
+      movesCount: 23,
+    };
+    s = withPool(s, [
+      { piece: u1, consumed: false },
+      { piece: u1, consumed: false },
+      { piece: u1, consumed: false },
+    ]);
+    const out = tryPlace(s, 0, 4, 4);
+    expect(out).not.toBeNull();
+    expect(out!.state.movesCount).toBe(24);
+    expect(out!.state.status).toBe('gameover');
+  });
+
   it('respektiert das 2x2-Mindestmaß bei 10x10', () => {
     // Direkter Test der Schrumpf-Stufe: bei sehr hohem movesCount sollte
     // ringCap das Wachstum begrenzen
@@ -427,14 +446,14 @@ describe('engine.specials-vergabe', () => {
     expect(out!.state.specials.hammer).toBe(0);
   });
 
-  it('Special-Cap: keine Bombe mehr ab 3 Bomben im Inventar', () => {
+  it('Special-Cap: keine Bombe mehr ab 2 Bomben im Inventar', () => {
     const u1 = pieceById('U1')!;
     const board = emptyBoard();
     for (let x = 0; x < 9; x++) board[9][x] = '--piece-blue';
     let s: GameState = {
       ...newGame('endless', 1),
       combo: 2,
-      specials: { bomb: 3, hammer: 0, joker: 0 },
+      specials: { bomb: 2, hammer: 0, joker: 0 },
     };
     s = withBoard(withPool(s, [
       { piece: u1, consumed: false },
@@ -445,7 +464,7 @@ describe('engine.specials-vergabe', () => {
     expect(out).not.toBeNull();
     expect(out!.state.combo).toBe(3);
     // Combo x3 hätte Bombe gegeben -- aber Cap greift
-    expect(out!.state.specials.bomb).toBe(3);
+    expect(out!.state.specials.bomb).toBe(2);
   });
 
   it('Linien-Milestone skaliert mit Brettgröße: 10x10 erste Bombe nach ~60 Zellen', () => {

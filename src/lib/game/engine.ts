@@ -273,6 +273,12 @@ function shrinkIfNeeded(state: GameState): GameState {
   // Pieces blockiert sein -- die werden gegen passende ausgetauscht.
   if (justShrunk) {
     let next: GameState = { ...state, obstacles: obs, board, combo: 0 };
+    // Wenn die Innenfläche jetzt das 2x2-Minimum erreicht, ist die
+    // Partie zu Ende -- weitermachen wäre ein endloses Setzen kleiner
+    // Steine ohne wirkliche Spannung.
+    if (ring === ringCap && ring > 0) {
+      return { ...next, status: 'gameover' };
+    }
     next = ensurePoolPlacementForBoard(next);
     return next;
   }
@@ -317,7 +323,7 @@ export const COMBO_JOKER = 7;
 
 // Hard Cap pro Special-Sorte. Mehr darf der Spieler nicht horten --
 // sonst sind Specials nur noch Bequemlichkeit, nicht Lebensretter.
-export const SPECIAL_CAP = 3;
+export const SPECIAL_CAP = 2;
 
 function bumpSpecial(
   specials: SpecialInventory,

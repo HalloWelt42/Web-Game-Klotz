@@ -39,8 +39,8 @@
     },
     shrink: {
       title: 'Shrink',
-      tip: 'Brett schrumpft alle 6 Züge um eine Reihe nach innen. Jeder Schrumpf bricht die Combo. Wer bleibt am längsten am Leben?',
-      controls: ['Brettrand wird zu Block', 'Combo-Reset bei jedem Schrumpf', 'Innen am Ende nur noch 2x2'],
+      tip: 'Brett schrumpft alle 6 Züge um eine Reihe nach innen. Jeder Schrumpf bricht die Combo. Sobald die Innenfläche 2x2 erreicht, ist Schluss.',
+      controls: ['Brettrand wird zu Block', 'Combo-Reset bei jedem Schrumpf', 'Game Over bei 2x2 Innenfläche'],
     },
   };
 
