@@ -315,12 +315,24 @@ export const COMBO_BOMB = 3;
 export const COMBO_HAMMER = 5;
 export const COMBO_JOKER = 7;
 
+// Hard Cap pro Special-Sorte. Mehr darf der Spieler nicht horten --
+// sonst sind Specials nur noch Bequemlichkeit, nicht Lebensretter.
+export const SPECIAL_CAP = 3;
+
+function bumpSpecial(
+  specials: SpecialInventory,
+  kind: SpecialKind,
+  by: number = 1,
+): SpecialInventory {
+  return { ...specials, [kind]: Math.min(SPECIAL_CAP, specials[kind] + by) };
+}
+
 function awardSpecialsForCombo(combo: number, specials: SpecialInventory): SpecialInventory {
-  if (combo === COMBO_BOMB) return { ...specials, bomb: specials.bomb + 1 };
-  if (combo === COMBO_HAMMER) return { ...specials, hammer: specials.hammer + 1 };
-  if (combo === COMBO_JOKER) return { ...specials, joker: specials.joker + 1 };
-  if (combo === 10) return { ...specials, bomb: specials.bomb + 1, hammer: specials.hammer + 1 };
-  if (combo === 14) return { ...specials, joker: specials.joker + 1, bomb: specials.bomb + 1 };
+  if (combo === COMBO_BOMB) return bumpSpecial(specials, 'bomb');
+  if (combo === COMBO_HAMMER) return bumpSpecial(specials, 'hammer');
+  if (combo === COMBO_JOKER) return bumpSpecial(specials, 'joker');
+  if (combo === 10) return bumpSpecial(bumpSpecial(specials, 'bomb'), 'hammer');
+  if (combo === 14) return bumpSpecial(bumpSpecial(specials, 'joker'), 'bomb');
   return specials;
 }
 
@@ -343,13 +355,13 @@ function awardSpecialsForLineMilestone(
   const newCells = newLines * boardSize;
 
   if (Math.floor(newCells / CELLS_PER_BOMB) > Math.floor(prevCells / CELLS_PER_BOMB)) {
-    next = { ...next, bomb: next.bomb + 1 };
+    next = bumpSpecial(next, 'bomb');
   }
   if (Math.floor(newCells / CELLS_PER_HAMMER) > Math.floor(prevCells / CELLS_PER_HAMMER)) {
-    next = { ...next, hammer: next.hammer + 1 };
+    next = bumpSpecial(next, 'hammer');
   }
   if (Math.floor(newCells / CELLS_PER_JOKER) > Math.floor(prevCells / CELLS_PER_JOKER)) {
-    next = { ...next, joker: next.joker + 1 };
+    next = bumpSpecial(next, 'joker');
   }
   return next;
 }
