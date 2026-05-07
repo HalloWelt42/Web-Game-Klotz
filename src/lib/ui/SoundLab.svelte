@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { playSfx } from '../audio/sfx';
+  import { playPlaceVariant, playSfx, type PlaceVariantId } from '../audio/sfx';
 
   type Variant = { label: string; opts?: { cells?: number; combo?: number; pitch?: number } };
   type SfxKind =
@@ -24,20 +24,69 @@
     variants?: Variant[];
   };
 
-  const entries: Entry[] = [
+  type PlaceProposal = {
+    id: PlaceVariantId;
+    label: string;
+    tag: string;
+    summary: string;
+  };
+
+  const placeProposals: PlaceProposal[] = [
     {
-      letter: 'a',
-      kind: 'place',
-      name: 'place',
-      purpose: 'Spielstein wird auf das Brett gelegt',
-      description:
-        'Hochfrequenter Knack-Transient + warmer Body-Ton mit kurzer Pitch-Senke. Sub-Bass + Holz-Anschlag skalieren mit Steingröße.',
-      variants: [
-        { label: '1 Zelle', opts: { cells: 1 } },
-        { label: '4 Zellen', opts: { cells: 4 } },
-        { label: '8 Zellen', opts: { cells: 8 } },
-      ],
+      id: 1,
+      label: 'V1 Soft-Hybrid',
+      tag: 'aktuell im Spiel',
+      summary:
+        'Click + warmer Triangle-Body mit Pitch-Senke + Sub-Bass + leichter Wood-Hauch bei großen Steinen. Modern, körperhaft.',
     },
+    {
+      id: 2,
+      label: 'V2 Wood-Klack',
+      tag: 'organisch',
+      summary:
+        'Trockener Holzanschlag: kurzer harter Click + Bandpass-Rauschen + kurzer Triangle-Decay. Kein Bass, kein Reverb -- wie Holzbrett.',
+    },
+    {
+      id: 3,
+      label: 'V3 Mechanik / Tech',
+      tag: 'präzise',
+      summary:
+        'Sauberer mechanischer Click + kurzer Square-Sustain mit Resonanz + Hauch von Highpass-Rauschen. Klar, plastik-/cyber-artig.',
+    },
+    {
+      id: 4,
+      label: 'V4 Plüsch / Filz',
+      tag: 'weich',
+      summary:
+        'Kein Click. Tieffrequenter Sinus-Body mit Lowpass + langer Release. Gepolstert, "Filz-Brettspiel"-Charakter.',
+    },
+    {
+      id: 5,
+      label: 'V5 Glas / Crystal',
+      tag: 'hell',
+      summary:
+        'Kleiner Click + heller Sine-Anschlag mit kleinem Resonanz-Sustain + Reverb. Bei größeren Steinen kommt eine Glas-Quinte dazu.',
+    },
+    {
+      id: 6,
+      label: 'V6 Pop / Bubble',
+      tag: 'verspielt',
+      summary:
+        'Kein Click. Triangle-Body mit aufsteigender Pitch-Kurve (Bow von tief nach hoch). Spielerisch, fast Toy-App.',
+    },
+  ];
+
+  const placeSizes: Variant[] = [
+    { label: 'Klein (1)', opts: { cells: 1 } },
+    { label: 'Mittel (4)', opts: { cells: 4 } },
+    { label: 'Groß (8)', opts: { cells: 8 } },
+  ];
+
+  function playPlace(variant: PlaceVariantId, cells: number) {
+    playPlaceVariant(variant, cells);
+  }
+
+  const entries: Entry[] = [
     {
       letter: 'b',
       kind: 'clear',
@@ -138,6 +187,41 @@
   </header>
 
   <ol class="entries">
+    <li class="entry place-entry">
+      <div class="letter" aria-hidden="true">a</div>
+      <div class="meta">
+        <h2><code>place</code> -- Spielstein wird auf das Brett gelegt</h2>
+        <p class="desc">
+          Sechs Vorschläge zur Auswahl. Bitte durchhören und mit
+          <em>"a3 gefällt"</em> oder <em>"a2 zu trocken, mit etwas Bass"</em>
+          markieren -- Mehrfachauswahl auch ok.
+        </p>
+        <div class="proposals">
+          {#each placeProposals as p}
+            <div class="proposal" id={`place-v${p.id}`}>
+              <div class="proposal-head">
+                <strong>a{p.id} -- {p.label}</strong>
+                <span class="proposal-tag">{p.tag}</span>
+              </div>
+              <p class="proposal-summary">{p.summary}</p>
+              <div class="actions">
+                {#each placeSizes as s}
+                  <button
+                    type="button"
+                    class="btn"
+                    onclick={() => playPlace(p.id, s.opts?.cells ?? 4)}
+                  >
+                    <i class="fa-solid fa-play"></i>
+                    {s.label}
+                  </button>
+                {/each}
+              </div>
+            </div>
+          {/each}
+        </div>
+      </div>
+    </li>
+
     {#each entries as e (e.kind)}
       <li class="entry">
         <div class="letter" aria-hidden="true">{e.letter}</div>
@@ -275,6 +359,56 @@
     gap: 6px;
     flex-wrap: wrap;
     margin-top: 4px;
+  }
+
+  .proposals {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 6px;
+  }
+
+  .proposal {
+    padding: 10px 12px;
+    background: var(--surface-strong);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+  }
+
+  .proposal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+
+  .proposal-head strong {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .proposal-tag {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--accent) 18%, transparent);
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  .proposal-summary {
+    margin: 0 0 8px;
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.45;
+  }
+
+  .place-entry .meta h2 {
+    margin-bottom: 2px;
   }
 
   .btn {

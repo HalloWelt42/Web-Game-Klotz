@@ -175,6 +175,161 @@ function pitchForSize(cells: number): number {
 
 let placeVariant = 0;
 
+// ---- Place-Varianten zum A/B-Vergleich im Sound-Lab ----
+
+function placeV1SoftHybrid(cells: number): void {
+  // Aktuelle Implementierung: Click + warmer Triangle + Sub-Bass + Wood-Hauch
+  const baseFreq = pitchForSize(cells);
+  click(0.7 + Math.min(0.3, cells * 0.05));
+  placeVariant = (placeVariant + 1) % 3;
+  const detune = (placeVariant - 1) * 18;
+  tone(baseFreq, 110, {
+    type: 'triangle',
+    gain: 0.1,
+    attack: 0.001,
+    decay: 0.06,
+    release: 0.05,
+    detune,
+    pitchEnvelope: { from: baseFreq * 1.3, to: baseFreq, time: 0.025 },
+    reverb: 0.25,
+  });
+  tone(baseFreq * 0.5, 140, {
+    type: 'sine',
+    gain: 0.05 + Math.min(0.07, cells * 0.012),
+    attack: 0.002,
+    decay: 0.1,
+    release: 0.05,
+    filterFreq: 800,
+  });
+  if (cells >= 4) noise(28, 0.04, 3000, 'bandpass');
+}
+
+function placeV2WoodKlack(cells: number): void {
+  // Trockener Holzklack: kurzer harter Anschlag, kein Bass, kein Reverb
+  const baseFreq = pitchForSize(cells) * 0.85;
+  click(0.5);
+  noise(40, 0.06 + Math.min(0.04, cells * 0.005), 2400, 'bandpass');
+  tone(baseFreq, 70, {
+    type: 'triangle',
+    gain: 0.08,
+    attack: 0.0005,
+    decay: 0.04,
+    release: 0.02,
+    filterFreq: 1500,
+  });
+}
+
+function placeV3MechanikTech(cells: number): void {
+  // Sauberer mechanischer Click mit metallischem Mini-Sustain, präzise
+  const baseFreq = pitchForSize(cells) * 1.2;
+  click(1.0);
+  tone(baseFreq, 60, {
+    type: 'square',
+    gain: 0.06,
+    attack: 0.0005,
+    decay: 0.025,
+    release: 0.025,
+    filterFreq: baseFreq * 3,
+    filterQ: 4,
+  });
+  noise(20, 0.03, 5000, 'highpass');
+  tone(baseFreq * 2, 40, {
+    type: 'sine',
+    gain: 0.025,
+    attack: 0.001,
+    decay: 0.03,
+    release: 0.02,
+  });
+}
+
+function placeV4PluschFilz(cells: number): void {
+  // Weich, kein Click, gefilterter dumpfer Body, lange Release
+  const baseFreq = pitchForSize(cells) * 0.7;
+  tone(baseFreq, 180, {
+    type: 'sine',
+    gain: 0.1 + Math.min(0.05, cells * 0.008),
+    attack: 0.005,
+    decay: 0.12,
+    release: 0.1,
+    filterFreq: 600,
+    pitchEnvelope: { from: baseFreq * 1.15, to: baseFreq, time: 0.06 },
+  });
+  tone(baseFreq * 0.5, 220, {
+    type: 'sine',
+    gain: 0.05,
+    attack: 0.01,
+    decay: 0.15,
+    release: 0.1,
+    filterFreq: 400,
+  });
+}
+
+function placeV5GlasCrystal(cells: number): void {
+  // Heller glasiger Anschlag mit kleinem Resonanz-Sustain
+  const baseFreq = pitchForSize(cells) * 1.6;
+  click(0.4);
+  tone(baseFreq, 200, {
+    type: 'sine',
+    gain: 0.08,
+    attack: 0.001,
+    decay: 0.16,
+    release: 0.1,
+    reverb: 0.5,
+  });
+  tone(baseFreq * 1.5, 140, {
+    type: 'triangle',
+    gain: 0.04,
+    attack: 0.002,
+    decay: 0.1,
+    release: 0.08,
+    reverb: 0.6,
+  });
+  if (cells >= 3) {
+    tone(baseFreq * 2, 100, {
+      type: 'sine',
+      gain: 0.025,
+      attack: 0.005,
+      decay: 0.08,
+      release: 0.05,
+      reverb: 0.7,
+    });
+  }
+}
+
+function placeV6PopBubble(cells: number): void {
+  // Pop/Bubble: schnelle Pitch-Up-Kurve, freundlich, kurz
+  const baseFreq = pitchForSize(cells);
+  tone(baseFreq, 80, {
+    type: 'triangle',
+    gain: 0.1,
+    attack: 0.001,
+    decay: 0.05,
+    release: 0.04,
+    pitchEnvelope: { from: baseFreq * 0.6, to: baseFreq * 1.4, time: 0.05 },
+    reverb: 0.15,
+  });
+  tone(baseFreq * 2, 50, {
+    type: 'sine',
+    gain: 0.04,
+    attack: 0.002,
+    decay: 0.04,
+    release: 0.02,
+  });
+}
+
+export type PlaceVariantId = 1 | 2 | 3 | 4 | 5 | 6;
+
+export function playPlaceVariant(variant: PlaceVariantId, cells: number = 4): void {
+  switch (variant) {
+    case 1: placeV1SoftHybrid(cells); break;
+    case 2: placeV2WoodKlack(cells); break;
+    case 3: placeV3MechanikTech(cells); break;
+    case 4: placeV4PluschFilz(cells); break;
+    case 5: placeV5GlasCrystal(cells); break;
+    case 6: placeV6PopBubble(cells); break;
+  }
+}
+
 export function playSfx(
   kind: SfxKind,
   enabled: boolean,
@@ -186,41 +341,11 @@ export function playSfx(
     case 'place': {
       if (now - lastPlaceAt < 60) return;
       lastPlaceAt = now;
-      placeVariant = (placeVariant + 1) % 3;
       const cells = options.cells ?? 1;
-      const baseFreq = options.pitch ?? pitchForSize(cells);
-
-      // Knack-Komponente: hochfrequenter Transient
-      click(0.7 + Math.min(0.3, cells * 0.05));
-
-      // Tonal-Komponente: warmer Body mit subtiler Pitch-Senke
-      const v = placeVariant;
-      const detune = (v - 1) * 18;
-      tone(baseFreq, 110, {
-        type: 'triangle',
-        gain: 0.1,
-        attack: 0.001,
-        decay: 0.06,
-        release: 0.05,
-        detune,
-        pitchEnvelope: { from: baseFreq * 1.3, to: baseFreq, time: 0.025 },
-        reverb: 0.25,
-      });
-
-      // Sub-Bass für Wuchtigkeit, skaliert mit Steingröße
-      tone(baseFreq * 0.5, 140, {
-        type: 'sine',
-        gain: 0.05 + Math.min(0.07, cells * 0.012),
-        attack: 0.002,
-        decay: 0.1,
-        release: 0.05,
-        filterFreq: 800,
-      });
-
-      // Holziger Anschlag bei größeren Steinen
-      if (cells >= 4) {
-        noise(28, 0.04, 3000, 'bandpass');
-      }
+      // Standard: Variante 1 (Soft-Hybrid). Wird über das Sound-Lab
+      // ausgewählt -- aktuelle Konfiguration wird hier zentral umgestellt,
+      // sobald der Nutzer sich auf eine Variante festlegt.
+      placeV1SoftHybrid(cells);
       break;
     }
     case 'clear': {
