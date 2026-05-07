@@ -459,6 +459,15 @@
     place-items: start center;
   }
 
+  /* Page-Routes (stats, achievements, replays, settings, donate, help,
+     new-game) sind einspaltige Inhalte. Sie duerfen nicht ins
+     3-Spalten-Spiel-Grid fallen, sonst landet der Inhalt in der
+     schmalen Sidebar-Spalte. */
+  main.page {
+    grid-template-columns: 1fr;
+    width: min(720px, 100%);
+  }
+
   .side {
     display: none;
   }
@@ -476,14 +485,15 @@
   }
 
   @media (min-width: 1100px) {
-    main {
+    /* 3-Spalten nur fuer das Spielbrett, nicht fuer Home oder Page. */
+    main:not(.home):not(.page) {
       grid-template-columns: 280px minmax(420px, 560px) 280px;
       gap: 24px;
       width: min(1180px, 100%);
       align-items: start;
     }
 
-    .side {
+    main:not(.home):not(.page) .side {
       display: flex;
       flex-direction: column;
       gap: 16px;
