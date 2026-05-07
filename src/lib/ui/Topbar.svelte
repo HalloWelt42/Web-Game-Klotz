@@ -7,9 +7,10 @@
   type Props = {
     onNewGame: () => void;
     onSurrender: () => void;
+    onOpenDonate: () => void;
   };
 
-  let { onNewGame, onSurrender }: Props = $props();
+  let { onNewGame, onSurrender, onOpenDonate }: Props = $props();
 
   const isGame = $derived.by(() => {
     const k = router.route.kind;
@@ -74,6 +75,15 @@
         <i class="fa-solid fa-shapes"></i>
       </button>
     {/if}
+
+    <button
+      class="ghost donate-btn"
+      title="Danke sagen"
+      aria-label="Danke sagen"
+      onclick={onOpenDonate}
+    >
+      <i class="fa-solid fa-heart"></i>
+    </button>
   </div>
 </header>
 
@@ -156,5 +166,17 @@
   .actions button:hover:not(:disabled) {
     background: var(--surface-strong);
     border-color: var(--border);
+  }
+
+  .donate-btn i {
+    color: #ff4d6d;
+    animation: heart-pulse 2.4s ease-in-out infinite;
+  }
+
+  @keyframes heart-pulse {
+    0%, 100% { transform: scale(1); }
+    25% { transform: scale(1.18); }
+    50% { transform: scale(0.96); }
+    75% { transform: scale(1.08); }
   }
 </style>

@@ -32,7 +32,7 @@
   import type { GameMode } from './lib/game/types';
   import { newFromReplay } from './lib/game/engine';
   import type { Replay } from './lib/game/types';
-  import { router, routeToPath } from './lib/router.svelte';
+  import { router } from './lib/router.svelte';
 
   const TUTORIAL_KEY = 'klotz:tutorial-shown';
 
@@ -320,6 +320,7 @@
 <Topbar
   onNewGame={openNewGame}
   onSurrender={() => (showSurrenderConfirm = true)}
+  onOpenDonate={() => openOverlay('donate')}
 />
 
 <main

@@ -30,7 +30,7 @@ import type {
 } from './types';
 import { obstacleKey } from './types';
 
-export function makeRng(seed: number): Rng {
+function makeRng(seed: number): Rng {
   return mulberry32(seed);
 }
 
@@ -480,7 +480,7 @@ const SPECIAL_PIECE_ID: Record<SpecialKind, string> = {
   joker: 'SP_JOKER',
 };
 
-export function canUseSpecial(state: GameState, kind: SpecialKind): boolean {
+function canUseSpecial(state: GameState, kind: SpecialKind): boolean {
   return state.status === 'running' && (state.specials[kind] ?? 0) > 0;
 }
 
@@ -593,10 +593,6 @@ const ROTATION_PARTNERS: Record<string, string> = {
 function rotateById(id: string): Piece | null {
   const target = ROTATION_PARTNERS[id];
   return target ? pieceById(target) ?? null : null;
-}
-
-export function replayFromCurrentState(state: GameState): Replay {
-  return state.replay;
 }
 
 export function newFromReplay(replay: Replay): GameState {
