@@ -161,6 +161,14 @@
     letter-spacing: 0.02em;
   }
 
+  /* Auf schmalen Mobile-Screens reicht das Logo -- Schriftzug weg,
+     damit die Action-Icons und der Streak-Badge nicht in die Enge geraten. */
+  @media (max-width: 480px) {
+    .title {
+      display: none;
+    }
+  }
+
   .streak {
     display: inline-flex;
     align-items: center;
