@@ -332,6 +332,33 @@ describe('engine.shrink', () => {
     expect(countBlocks(out!.state)).toBe(36);
   });
 
+  it('Pool wird nach Schrumpf-Tick revalidiert -- kein Patt durch zu große Steine', () => {
+    // Der Pool enthält ein I5H (5 Zellen breit). Nach mehreren Shrink-Ticks
+    // ist das Innere zu klein, um den Stein zu platzieren -- der Engine
+    // muss den unspielbaren Slot durch ein passendes Piece ersetzen.
+    const i5h = pieceById('I5H')!;
+    let s: GameState = {
+      ...newGame('shrink', 1),
+      movesCount: 23, // beim nächsten Zug -> 24, Ring 4 bei 10x10 = 2x2 innen
+    };
+    s = withPool(s, [
+      { piece: pieceById('U1')!, consumed: false }, // platzierbar in 2x2
+      { piece: i5h, consumed: true },
+      { piece: i5h, consumed: true },
+    ]);
+    // U1 platzieren -> Schrumpf-Tick -> Pool-Refill (alle consumed)
+    const out = tryPlace(s, 0, 4, 4);
+    expect(out).not.toBeNull();
+    // Pool sollte jetzt platzierbare Pieces haben
+    const placeable = out!.state.pool.some((slot) => {
+      if (slot.consumed) return false;
+      // Innenfläche ist nach Ring 4 nur noch 2x2 (Spalten 4-5, Reihen 4-5)
+      // I5H mit Breite 5 passt da nicht
+      return slot.piece.width <= 2 && slot.piece.height <= 2;
+    });
+    expect(placeable).toBe(true);
+  });
+
   it('respektiert das 2x2-Mindestmaß bei 10x10', () => {
     // Direkter Test der Schrumpf-Stufe: bei sehr hohem movesCount sollte
     // ringCap das Wachstum begrenzen

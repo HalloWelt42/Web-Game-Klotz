@@ -71,6 +71,29 @@ function poolHasPlacement(board: Board, obstacles: ObstacleMap, pool: Pool): boo
   return false;
 }
 
+// Tauscht alle nicht-konsumierten Pool-Slots durch sicher passende Steine
+// aus, falls aktuell keiner der verbliebenen Pieces noch ins Brett passt.
+// Wird nach jedem Schrumpf-Tick aufgerufen, weil dort das Brett kleiner
+// werden kann und vorher passende Steine plötzlich blockiert sind.
+function ensurePoolPlacementForBoard(state: GameState): GameState {
+  if (poolHasPlacement(state.board, state.obstacles, state.pool)) return state;
+  const rng = deriveRngForState(state);
+  const newPool = state.pool.map((slot) => slot) as Pool;
+  let replaced = false;
+  for (let slotIdx = 0; slotIdx < 3; slotIdx++) {
+    if (newPool[slotIdx].consumed) continue;
+    for (let attempt = 0; attempt < 80; attempt++) {
+      const candidate = pickFromPool(rng, STANDARD_PIECES);
+      if (findFirstFit(state.board, candidate, state.obstacles)) {
+        newPool[slotIdx] = { piece: candidate, consumed: false };
+        replaced = true;
+        break;
+      }
+    }
+  }
+  return replaced ? { ...state, pool: newPool } : state;
+}
+
 export function rollPool(
   rng: Rng,
   mode: GameMode,
@@ -245,9 +268,13 @@ function shrinkIfNeeded(state: GameState): GameState {
       if (obs[obstacleKey(x, y)] === 'block') board[y][x] = null;
     }
   // Schrumpft das Brett gerade -- Combo abbrechen, damit kein
-  // unendlicher Combo-Aufbau mehr möglich ist.
+  // unendlicher Combo-Aufbau mehr möglich ist. Außerdem den Pool
+  // revalidieren: durch das engere Innere können vorher passende
+  // Pieces blockiert sein -- die werden gegen passende ausgetauscht.
   if (justShrunk) {
-    return { ...state, obstacles: obs, board, combo: 0 };
+    let next: GameState = { ...state, obstacles: obs, board, combo: 0 };
+    next = ensurePoolPlacementForBoard(next);
+    return next;
   }
   return { ...state, obstacles: obs, board };
 }

@@ -54,7 +54,9 @@ function createStatsStore() {
   async function recordPlacement(state: GameState, clearedRows: number, clearedCols: number) {
     value.rowsCleared += clearedRows;
     value.colsCleared += clearedCols;
-    if (state.combo > value.highestCombo) value.highestCombo = state.combo;
+    // streak ist immer >= combo und überlebt Shrink-Reset -- daher als
+    // verlässlichere Quelle für die Lifetime-Maxima nehmen.
+    if (state.streak > value.highestCombo) value.highestCombo = state.streak;
     if (state.streak > value.longestStreak) value.longestStreak = state.streak;
 
     const size = state.boardSize;
