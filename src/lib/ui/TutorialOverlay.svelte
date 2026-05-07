@@ -34,7 +34,7 @@
       title: 'Specials als Lebensretter',
       icon: 'fa-bomb',
       text:
-        'Bei Combo x2 verdienst du eine Bombe (3x3 leeren), bei x3 einen Hammer (eine Zelle), bei x4 einen Joker. Auch alle 5 / 10 / 20 geräumten Linien gibt es einen. Solange Specials im Inventar liegen, kann das Spiel nicht enden.',
+        'Bei Combo x3 verdienst du eine Bombe (3x3 leeren), bei x5 einen Hammer (eine Zelle), bei x7 einen Joker. Außerdem gibt es Specials nach geräumten Zellen, brettgrößen-skaliert (z.B. ~6 Reihen auf 10x10 für eine Bombe). Solange Specials im Inventar liegen, kann das Spiel nicht enden.',
     },
     {
       title: 'Modi für jeden Geschmack',

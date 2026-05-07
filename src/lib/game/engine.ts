@@ -309,29 +309,46 @@ export function isStuckButRescuable(state: GameState): boolean {
   );
 }
 
+// Combo-Schwellen für Special-Vergabe -- bewusst seltener als früher
+// (war 2/3/4), damit Pools nicht in Specials ertrinken.
+export const COMBO_BOMB = 3;
+export const COMBO_HAMMER = 5;
+export const COMBO_JOKER = 7;
+
 function awardSpecialsForCombo(combo: number, specials: SpecialInventory): SpecialInventory {
-  if (combo === 2) return { ...specials, bomb: specials.bomb + 1 };
-  if (combo === 3) return { ...specials, hammer: specials.hammer + 1 };
-  if (combo === 4) return { ...specials, joker: specials.joker + 1 };
-  if (combo === 6) return { ...specials, bomb: specials.bomb + 1, hammer: specials.hammer + 1 };
-  if (combo === 8) return { ...specials, joker: specials.joker + 1, bomb: specials.bomb + 1 };
+  if (combo === COMBO_BOMB) return { ...specials, bomb: specials.bomb + 1 };
+  if (combo === COMBO_HAMMER) return { ...specials, hammer: specials.hammer + 1 };
+  if (combo === COMBO_JOKER) return { ...specials, joker: specials.joker + 1 };
+  if (combo === 10) return { ...specials, bomb: specials.bomb + 1, hammer: specials.hammer + 1 };
+  if (combo === 14) return { ...specials, joker: specials.joker + 1, bomb: specials.bomb + 1 };
   return specials;
 }
+
+// Linien-Meilensteine sind brettgrößen-skaliert: wir zählen die ungefähre
+// Anzahl geräumter Zellen (Linien * boardSize) und vergeben nach Schwellen.
+// So fühlt sich der Bonus auf 6x6 nicht plötzlich doppelt so freigiebig an
+// wie auf 12x12, weil eine 6er-Reihe weniger Zellen pro Linie freigibt.
+export const CELLS_PER_BOMB = 60;
+export const CELLS_PER_HAMMER = 130;
+export const CELLS_PER_JOKER = 260;
 
 function awardSpecialsForLineMilestone(
   prevLines: number,
   newLines: number,
+  boardSize: number,
   specials: SpecialInventory,
 ): SpecialInventory {
   let next = specials;
-  // Alle 5 Linien: Bombe; alle 10: Hammer; alle 20: Joker
-  if (Math.floor(newLines / 5) > Math.floor(prevLines / 5)) {
+  const prevCells = prevLines * boardSize;
+  const newCells = newLines * boardSize;
+
+  if (Math.floor(newCells / CELLS_PER_BOMB) > Math.floor(prevCells / CELLS_PER_BOMB)) {
     next = { ...next, bomb: next.bomb + 1 };
   }
-  if (Math.floor(newLines / 10) > Math.floor(prevLines / 10)) {
+  if (Math.floor(newCells / CELLS_PER_HAMMER) > Math.floor(prevCells / CELLS_PER_HAMMER)) {
     next = { ...next, hammer: next.hammer + 1 };
   }
-  if (Math.floor(newLines / 20) > Math.floor(prevLines / 20)) {
+  if (Math.floor(newCells / CELLS_PER_JOKER) > Math.floor(prevCells / CELLS_PER_JOKER)) {
     next = { ...next, joker: next.joker + 1 };
   }
   return next;
@@ -379,7 +396,12 @@ function applyPlacement(
   newSpecials = awardSpecialsForCombo(newCombo, newSpecials);
   const prevTotalLines = state.rowsCleared + state.colsCleared;
   const newTotalLines = prevTotalLines + cleared.clearedRows.length + cleared.clearedCols.length;
-  newSpecials = awardSpecialsForLineMilestone(prevTotalLines, newTotalLines, newSpecials);
+  newSpecials = awardSpecialsForLineMilestone(
+    prevTotalLines,
+    newTotalLines,
+    state.boardSize,
+    newSpecials,
+  );
 
   let next: GameState = {
     ...state,

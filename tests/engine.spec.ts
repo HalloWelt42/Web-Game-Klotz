@@ -382,6 +382,73 @@ describe('engine.shrink', () => {
   });
 });
 
+describe('engine.specials-vergabe', () => {
+  it('Combo x2 vergibt KEINE Bombe (Schwelle ist x3)', () => {
+    // Konstruiere einen State mit combo=1 und einer Reihe, die durch
+    // den Zug voll wird -> newCombo=2 -> sollte KEIN Special geben
+    const u1 = pieceById('U1')!;
+    const board = emptyBoard();
+    // Reihe 9 bis auf eine Zelle voll
+    for (let x = 0; x < 9; x++) board[9][x] = '--piece-blue';
+    let s: GameState = {
+      ...newGame('endless', 1),
+      combo: 1,
+    };
+    s = withBoard(withPool(s, [
+      { piece: u1, consumed: false },
+      { piece: u1, consumed: false },
+      { piece: u1, consumed: false },
+    ]), board);
+    const specialsBefore = { ...s.specials };
+    const out = tryPlace(s, 0, 9, 9);
+    expect(out).not.toBeNull();
+    expect(out!.state.combo).toBe(2);
+    // Combo x2 vergibt nichts mehr
+    expect(out!.state.specials).toEqual(specialsBefore);
+  });
+
+  it('Combo x3 vergibt eine Bombe', () => {
+    const u1 = pieceById('U1')!;
+    const board = emptyBoard();
+    for (let x = 0; x < 9; x++) board[9][x] = '--piece-blue';
+    let s: GameState = {
+      ...newGame('endless', 1),
+      combo: 2,
+    };
+    s = withBoard(withPool(s, [
+      { piece: u1, consumed: false },
+      { piece: u1, consumed: false },
+      { piece: u1, consumed: false },
+    ]), board);
+    const out = tryPlace(s, 0, 9, 9);
+    expect(out).not.toBeNull();
+    expect(out!.state.combo).toBe(3);
+    expect(out!.state.specials.bomb).toBe(1);
+    expect(out!.state.specials.hammer).toBe(0);
+  });
+
+  it('Linien-Milestone skaliert mit Brettgröße: 10x10 erste Bombe nach ~60 Zellen', () => {
+    // 6 geräumte Linien * 10 = 60 Zellen -> 1 Bombe
+    const u1 = pieceById('U1')!;
+    const board = emptyBoard();
+    for (let x = 0; x < 9; x++) board[9][x] = '--piece-blue';
+    let s: GameState = {
+      ...newGame('endless', 1),
+      rowsCleared: 5, // wir haben schon 5 Linien geräumt (50 Zellen)
+      colsCleared: 0,
+    };
+    s = withBoard(withPool(s, [
+      { piece: u1, consumed: false },
+      { piece: u1, consumed: false },
+      { piece: u1, consumed: false },
+    ]), board);
+    const out = tryPlace(s, 0, 9, 9);
+    expect(out).not.toBeNull();
+    // Nach 6 Linien ergibt 60 Zellen, das überschreitet die 60-Schwelle
+    expect(out!.state.specials.bomb).toBe(1);
+  });
+});
+
 describe('engine.replay', () => {
   it('kann eine Partie aus Replay rekonstruieren', () => {
     let original = newGame('endless', 12345);

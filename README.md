@@ -30,9 +30,11 @@ Block-Puzzle-Spiel im 1010!-Stil als Web-PWA. Lokal, offline, ohne Tracker.
 
 ## Specials
 
-- **Bombe** (3x3 leeren) -- ab Combo x2 oder alle 5 geräumte Linien
-- **Hammer** (1 Zelle) -- ab Combo x3 oder alle 10 Linien
-- **Joker** (1 freie Zelle besetzen) -- ab Combo x4 oder alle 20 Linien
+- **Bombe** (3x3 leeren) -- ab Combo x3 oder alle ~60 geräumten Zellen
+- **Hammer** (1 Zelle) -- ab Combo x5 oder alle ~130 geräumten Zellen
+- **Joker** (1 freie Zelle besetzen) -- ab Combo x7 oder alle ~260 geräumten Zellen
+
+Die Linien-Meilensteine sind brettgrößen-skaliert: auf 6x6 dauert es länger pro Linie als auf 12x12, sodass die Bonus-Frequenz unabhängig von der Brettgröße bleibt.
 
 Specials werden über die Specials-Bar unter dem Pool ausgewählt und durch Klick auf eine Zelle eingesetzt.
 
