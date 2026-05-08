@@ -37,7 +37,7 @@
       if (paused) return;
       secondsLeft -= 1;
       if (secondsLeft <= 0) {
-        backToMenu();
+        autoExit();
       }
     }, 1000);
   }
@@ -46,6 +46,16 @@
     if (timerHandle !== null) {
       clearInterval(timerHandle);
       timerHandle = null;
+    }
+  }
+
+  // Im Level-Modus zurueck zur Levels-Uebersicht (man will ja
+  // weitermachen), sonst ins Hauptmenue.
+  function autoExit() {
+    if (game.state.mode === 'level') {
+      backToLevels();
+    } else {
+      backToMenu();
     }
   }
 
@@ -125,7 +135,7 @@
   );
 </script>
 
-<Modal {open} title={won ? 'Geschafft!' : 'Vorbei!'} onClose={backToMenu} closeOnBackdrop={false}>
+<Modal {open} title={won ? 'Geschafft!' : 'Vorbei!'} onClose={autoExit} closeOnBackdrop={false}>
   <div class="content" class:won>
     {#if won}
       <div class="trophy">
@@ -162,7 +172,11 @@
         class="countdown"
         class:paused
         aria-live="polite"
-        aria-label={paused ? 'Auto-Timer angehalten' : `Automatisch zurück zum Menü in ${secondsLeft} Sekunden`}
+        aria-label={paused
+          ? 'Auto-Timer angehalten'
+          : game.state.mode === 'level'
+            ? `Automatisch zur Level-Übersicht in ${secondsLeft} Sekunden`
+            : `Automatisch zurück zum Menü in ${secondsLeft} Sekunden`}
       >
         <svg viewBox="0 0 36 36" aria-hidden="true">
           <circle class="ring-bg" cx="18" cy="18" r={RING_RADIUS}></circle>
@@ -178,20 +192,19 @@
         <span class="countdown-num">{paused ? '--' : secondsLeft}</span>
       </div>
       <div class="actions">
-        {#if won && game.state.mode === 'level'}
+        {#if game.state.mode === 'level'}
           <button class="ghost" onclick={backToLevels}>
             <i class="fa-solid fa-list"></i>
             Levels
           </button>
-          {#if nextLevelId}
+          <button class="ghost" onclick={restart}>
+            <i class="fa-solid fa-rotate-right"></i>
+            Wiederholen
+          </button>
+          {#if won && nextLevelId}
             <button class="primary" onclick={nextLevel}>
               <i class="fa-solid fa-forward"></i>
               Nächstes Level
-            </button>
-          {:else}
-            <button class="primary" onclick={backToMenu}>
-              <i class="fa-solid fa-house"></i>
-              Hauptmenü
             </button>
           {/if}
         {:else}
