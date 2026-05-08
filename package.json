@@ -2,7 +2,7 @@
   "name": "klotz",
   "description": "Klotz -- ein lokales Block-Puzzle-Spiel im 1010!-Stil",
   "private": true,
-  "version": "0.4.5",
+  "version": "0.4.6",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -12,6 +12,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
+    "test:solver": "KLOTZ_TEST_DIAG=1 vitest run",
     "screenshots": "node scripts/screenshots.mjs"
   },
   "devDependencies": {

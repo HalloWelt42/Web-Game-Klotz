@@ -61,6 +61,12 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: false,
-    include: ['tests/**/*.spec.ts'],
+    // Default: nur Unit-/Spec-Tests. Diagnose-Suiten (z.B. Level-Solver,
+    // braucht ~15s) liegen in *.diag.ts und laufen via `pnpm test:solver`.
+    include:
+      process.env.KLOTZ_TEST_DIAG === '1'
+        ? ['tests/**/*.diag.ts']
+        : ['tests/**/*.spec.ts'],
+    testTimeout: process.env.KLOTZ_TEST_DIAG === '1' ? 30000 : 5000,
   },
 })

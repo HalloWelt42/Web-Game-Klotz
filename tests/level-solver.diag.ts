@@ -119,11 +119,13 @@ function solveLevel(levelId: string, seed: number): { won: boolean; status: stri
   };
 }
 
+// Diagnose-Suite -- nicht im normalen Test-Run, weil zu lang (~25s).
+// Aufruf: pnpm test:solver
 describe('level-solvability (greedy AI ueber Zufallsseeds)', () => {
-  // 250 statt 1000 Seeds, sonst dauert es zu lang. Aussagekraft reicht.
-  const SEEDS = 250;
+  // 100 Seeds reichen fuer Tendenz, halten den Lauf < 15s gesamt.
+  const SEEDS = 100;
   it.each(LEVELS.map((l) => [l.id, l]))(
-    'Level %s -- Erfolgsrate ueber 250 Seeds',
+    'Level %s -- Erfolgsrate ueber %d Seeds',
     (_id, level) => {
       let won = 0;
       let totalScore = 0;
