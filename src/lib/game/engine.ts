@@ -351,7 +351,7 @@ export const COMBO_JOKER = 7;
 
 // Hard Cap pro Special-Sorte. Mehr darf der Spieler nicht horten --
 // sonst sind Specials nur noch Bequemlichkeit, nicht Lebensretter.
-export const SPECIAL_CAP = 2;
+export const SPECIAL_CAP = 3;
 
 function bumpSpecial(
   specials: SpecialInventory,

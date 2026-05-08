@@ -506,14 +506,14 @@ describe('engine.specials-vergabe', () => {
     expect(out!.state.specials.hammer).toBe(0);
   });
 
-  it('Special-Cap: keine Bombe mehr ab 2 Bomben im Inventar', () => {
+  it('Special-Cap: keine Bombe mehr ab 3 Bomben im Inventar', () => {
     const u1 = pieceById('U1')!;
     const board = emptyBoard();
     for (let x = 0; x < 9; x++) board[9][x] = '--piece-blue';
     let s: GameState = {
       ...newGame('endless', 1),
       combo: 2,
-      specials: { bomb: 2, hammer: 0, joker: 0 },
+      specials: { bomb: 3, hammer: 0, joker: 0 },
     };
     s = withBoard(withPool(s, [
       { piece: u1, consumed: false },
@@ -524,7 +524,7 @@ describe('engine.specials-vergabe', () => {
     expect(out).not.toBeNull();
     expect(out!.state.combo).toBe(3);
     // Combo x3 hätte Bombe gegeben -- aber Cap greift
-    expect(out!.state.specials.bomb).toBe(2);
+    expect(out!.state.specials.bomb).toBe(3);
   });
 
   it('Linien-Milestone skaliert mit Brettgröße: 10x10 erste Bombe nach ~60 Zellen', () => {
