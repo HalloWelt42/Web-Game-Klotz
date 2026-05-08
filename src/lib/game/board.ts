@@ -97,17 +97,22 @@ export function fullRows(board: Board, obstacles: ObstacleMap = {}): number[] {
   const rows: number[] = [];
   for (let y = 0; y < size; y++) {
     let full = true;
+    let anyNonBlock = false;
     for (let x = 0; x < size; x++) {
       const k = obstacleKey(x, y);
       if (obstacles[k] === 'block') {
         continue;
       }
+      anyNonBlock = true;
       if (board[y][x] === null) {
         full = false;
         break;
       }
     }
-    if (full) rows.push(y);
+    // Eine Reihe, die komplett aus Block-Feldern besteht (z.B. Shrink-
+    // Außenring), darf nicht als "voll" zählen -- sonst löst sie bei
+    // jedem Zug eine Phantom-Räumung mit Combo und Bonus aus.
+    if (full && anyNonBlock) rows.push(y);
   }
   return rows;
 }
@@ -117,17 +122,19 @@ export function fullCols(board: Board, obstacles: ObstacleMap = {}): number[] {
   const cols: number[] = [];
   for (let x = 0; x < size; x++) {
     let full = true;
+    let anyNonBlock = false;
     for (let y = 0; y < size; y++) {
       const k = obstacleKey(x, y);
       if (obstacles[k] === 'block') {
         continue;
       }
+      anyNonBlock = true;
       if (board[y][x] === null) {
         full = false;
         break;
       }
     }
-    if (full) cols.push(x);
+    if (full && anyNonBlock) cols.push(x);
   }
   return cols;
 }

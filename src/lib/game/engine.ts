@@ -238,7 +238,7 @@ function refillIfEmpty(state: GameState): GameState {
   return state;
 }
 
-export const SHRINK_INTERVAL = 6;
+export const SHRINK_INTERVAL = 8;
 
 function shrinkIfNeeded(state: GameState): GameState {
   if (!state.shrinking) return state;

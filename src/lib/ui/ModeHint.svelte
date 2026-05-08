@@ -39,7 +39,7 @@
     },
     shrink: {
       title: 'Shrink',
-      tip: 'Brett schrumpft alle 6 Züge um eine Reihe nach innen. Jeder Schrumpf bricht die Combo. Sobald die Innenfläche 2x2 erreicht, ist Schluss.',
+      tip: 'Brett schrumpft alle 8 Züge um eine Reihe nach innen. Jeder Schrumpf bricht die Combo. Sobald die Innenfläche 2x2 erreicht, ist Schluss.',
       controls: ['Brettrand wird zu Block', 'Combo-Reset bei jedem Schrumpf', 'Game Over bei 2x2 Innenfläche'],
     },
   };
