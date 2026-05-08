@@ -139,7 +139,10 @@ export const MODES: Record<GameMode, ModeConfig> = {
     icon: 'fa-compress',
     boardSize: 10,
     poolFilter: () => true,
-    specialChance: 0.04,
+    // Keine Pool-Specials in Shrink: Sie würden zusätzliche Specials
+    // erzeugen (durch Linien-Räumung beim Setzen) und so wirken,
+    // als ob "grundlos" Bonus hochgezählt wird.
+    specialChance: 0,
     rotationAllowed: false,
     shrinking: true,
     solvabilityGuarantee: true,
