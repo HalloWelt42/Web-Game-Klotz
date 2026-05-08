@@ -130,7 +130,11 @@ export const MODES: Record<GameMode, ModeConfig> = {
     solvabilityGuarantee: true,
     initialBoard: reverseSetup,
     goal: { clears: 8 },
-    initialSpecials: { bomb: 1, hammer: 1, joker: 0 },
+    // Großzügiger Start-Vorrat: 3 von jeder Sorte. Sie sind hier
+    // wirklich gebraucht, weil das Brett mit verstreuten Lücken
+    // beginnt -- gerade auf größeren Feldern (12x12) sind passende
+    // Pieces selten platzierbar.
+    initialSpecials: { bomb: 3, hammer: 3, joker: 3 },
   },
   shrink: {
     id: 'shrink',
