@@ -14,9 +14,9 @@ export const LEVELS: Level[] = [
   {
     id: 'level-1',
     title: 'Aufwärmrunde',
-    description: 'Erreiche 80 Punkte in 14 Zügen.',
+    description: 'Erreiche 80 Punkte in 17 Zügen.',
     goal: { points: 80 },
-    movesLimit: 14,
+    movesLimit: 17,
     blockCount: 0,
     iceCount: 0,
   },
