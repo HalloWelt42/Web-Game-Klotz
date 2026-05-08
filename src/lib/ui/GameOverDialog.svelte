@@ -1,6 +1,7 @@
 <script lang="ts">
   import { game } from '../stores/game.svelte';
   import { MODES } from '../game/modes';
+  import { LEVELS } from '../game/levels';
   import { router, withBase } from '../router.svelte';
   import Modal from './Modal.svelte';
 
@@ -56,7 +57,32 @@
 
   function restart() {
     stopCountdown();
-    void game.startNew(game.state.mode);
+    if (game.state.mode === 'level' && game.state.levelId) {
+      void game.startNew('level', undefined, game.state.levelId);
+    } else {
+      void game.startNew(game.state.mode);
+    }
+  }
+
+  // Bei gewonnenem Level: das nächste Level (sofern vorhanden).
+  const nextLevelId = $derived.by(() => {
+    if (game.state.mode !== 'level' || !game.state.levelId) return null;
+    const idx = LEVELS.findIndex((l) => l.id === game.state.levelId);
+    if (idx < 0 || idx === LEVELS.length - 1) return null;
+    return LEVELS[idx + 1].id;
+  });
+
+  function nextLevel() {
+    if (!nextLevelId) return;
+    stopCountdown();
+    game.dismissGameEnd();
+    router.navigate({ kind: 'level', id: nextLevelId });
+  }
+
+  function backToLevels() {
+    stopCountdown();
+    game.dismissGameEnd();
+    router.navigate({ kind: 'levels' });
   }
 
   function makeUrl(): string {
@@ -152,18 +178,36 @@
         <span class="countdown-num">{paused ? '--' : secondsLeft}</span>
       </div>
       <div class="actions">
-        <button class="ghost" onclick={backToMenu}>
-          <i class="fa-solid fa-house"></i>
-          Hauptmenü
-        </button>
-        <button class="ghost" onclick={shareReplay}>
-          <i class="fa-solid fa-share-nodes"></i>
-          {copied ? 'Kopiert!' : 'Replay teilen'}
-        </button>
-        <button class="primary" onclick={restart}>
-          <i class="fa-solid fa-rotate-right"></i>
-          Neue Partie
-        </button>
+        {#if won && game.state.mode === 'level'}
+          <button class="ghost" onclick={backToLevels}>
+            <i class="fa-solid fa-list"></i>
+            Levels
+          </button>
+          {#if nextLevelId}
+            <button class="primary" onclick={nextLevel}>
+              <i class="fa-solid fa-forward"></i>
+              Nächstes Level
+            </button>
+          {:else}
+            <button class="primary" onclick={backToMenu}>
+              <i class="fa-solid fa-house"></i>
+              Hauptmenü
+            </button>
+          {/if}
+        {:else}
+          <button class="ghost" onclick={backToMenu}>
+            <i class="fa-solid fa-house"></i>
+            Hauptmenü
+          </button>
+          <button class="ghost" onclick={shareReplay}>
+            <i class="fa-solid fa-share-nodes"></i>
+            {copied ? 'Kopiert!' : 'Replay teilen'}
+          </button>
+          <button class="primary" onclick={restart}>
+            <i class="fa-solid fa-rotate-right"></i>
+            Neue Partie
+          </button>
+        {/if}
       </div>
     </div>
   {/snippet}

@@ -209,14 +209,14 @@ describe('engine end states', () => {
   it('Lost: Levels mit moves-Limit erschöpft, Goal nicht erreicht', () => {
     const u1 = pieceById('U1')!;
     let state = newGame('level', 1, 'level-1');
-    // moves-Limit = 12 für Level 1, Goal = 80 Punkte
+    // moves-Limit = 14 für Level 1, Goal = 80 Punkte
     state = withPool(state, [
       { piece: u1, consumed: false },
       { piece: u1, consumed: false },
       { piece: u1, consumed: false },
     ]);
-    state = { ...state, movesCount: 11 };
-    // U1 gibt 1 Punkt -> nach Zug 12 ist movesCount=12 und score=1, Goal 80 nicht erreicht
+    state = { ...state, movesCount: 13 };
+    // U1 gibt 1 Punkt -> nach Zug 14 ist movesCount=14 und score=1, Goal 80 nicht erreicht
     const out = tryPlace(state, 0, 5, 5);
     expect(out).not.toBeNull();
     expect(out!.state.status).toBe('gameover');
