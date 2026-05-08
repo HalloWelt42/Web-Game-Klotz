@@ -34,7 +34,7 @@
       title: 'Specials als Lebensretter',
       icon: 'fa-bomb',
       text:
-        'Bei Combo x3 verdienst du eine Bombe (3x3 leeren), bei x5 einen Hammer (eine Zelle), bei x7 einen Joker. Außerdem gibt es Specials nach geräumten Zellen, brettgrößen-skaliert. Pro Sorte maximal 3 im Inventar -- danach verfallen weitere. Solange Specials da sind, kann das Spiel nicht enden.',
+        'Bei Combo x3 verdienst du eine Bombe (3x3 leeren), bei x5 einen Hammer (eine Zelle), bei x7 einen Joker. Außerdem gibt es Specials nach geräumten Zellen, brettgrößen-skaliert. Maximaler Vorrat hängt vom Brett ab: 6x6 / 8x8 / 10x10 sind 2-3, 12x12 sind 4 pro Sorte. Solange Specials da sind, kann das Spiel nicht enden.',
     },
     {
       title: 'Modi für jeden Geschmack',

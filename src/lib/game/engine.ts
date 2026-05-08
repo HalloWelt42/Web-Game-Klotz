@@ -190,6 +190,18 @@ export function newGame(
   const pool = rollPool(rng, mode, setup.board, setup.obstacles);
   const replay: Replay = { seed, mode, levelId, moves: [] };
   const rotationAllowed = opts.rotationOverride ?? cfg.rotationAllowed;
+  // initialSpecials werden auf den brettgrößen-abhängigen Cap geclampt --
+  // damit z.B. Reverse auf 6x6 nicht mit 3 Bomben startet, wenn der
+  // Cap dort nur 2 zulässt.
+  const cap = specialCapForBoard(boardSize);
+  const baseSpecials = cfg.initialSpecials
+    ? { ...cfg.initialSpecials }
+    : { bomb: 0, hammer: 0, joker: 0 };
+  const initialSpecials: SpecialInventory = {
+    bomb: Math.min(cap, baseSpecials.bomb),
+    hammer: Math.min(cap, baseSpecials.hammer),
+    joker: Math.min(cap, baseSpecials.joker),
+  };
   return {
     mode,
     levelId,
@@ -198,7 +210,7 @@ export function newGame(
     board: setup.board,
     obstacles: setup.obstacles,
     pool,
-    specials: cfg.initialSpecials ? { ...cfg.initialSpecials } : { bomb: 0, hammer: 0, joker: 0 },
+    specials: initialSpecials,
     score: 0,
     combo: 0,
     streak: 0,
@@ -349,24 +361,35 @@ export const COMBO_BOMB = 3;
 export const COMBO_HAMMER = 5;
 export const COMBO_JOKER = 7;
 
-// Hard Cap pro Special-Sorte. Mehr darf der Spieler nicht horten --
-// sonst sind Specials nur noch Bequemlichkeit, nicht Lebensretter.
-export const SPECIAL_CAP = 3;
+// Special-Cap haengt von der Brettgroesse ab: groessere Bretter haben
+// mehr Lueck-Optionen und brauchen mehr Werkzeuge fuer den Notfall.
+//   6x6:  2 pro Sorte
+//   8x8:  3
+//   10x10: 3
+//   12x12: 4
+export function specialCapForBoard(boardSize: number): number {
+  return Math.max(2, Math.floor(boardSize / 4) + 1);
+}
 
 function bumpSpecial(
   specials: SpecialInventory,
   kind: SpecialKind,
+  cap: number,
   by: number = 1,
 ): SpecialInventory {
-  return { ...specials, [kind]: Math.min(SPECIAL_CAP, specials[kind] + by) };
+  return { ...specials, [kind]: Math.min(cap, specials[kind] + by) };
 }
 
-function awardSpecialsForCombo(combo: number, specials: SpecialInventory): SpecialInventory {
-  if (combo === COMBO_BOMB) return bumpSpecial(specials, 'bomb');
-  if (combo === COMBO_HAMMER) return bumpSpecial(specials, 'hammer');
-  if (combo === COMBO_JOKER) return bumpSpecial(specials, 'joker');
-  if (combo === 10) return bumpSpecial(bumpSpecial(specials, 'bomb'), 'hammer');
-  if (combo === 14) return bumpSpecial(bumpSpecial(specials, 'joker'), 'bomb');
+function awardSpecialsForCombo(
+  combo: number,
+  specials: SpecialInventory,
+  cap: number,
+): SpecialInventory {
+  if (combo === COMBO_BOMB) return bumpSpecial(specials, 'bomb', cap);
+  if (combo === COMBO_HAMMER) return bumpSpecial(specials, 'hammer', cap);
+  if (combo === COMBO_JOKER) return bumpSpecial(specials, 'joker', cap);
+  if (combo === 10) return bumpSpecial(bumpSpecial(specials, 'bomb', cap), 'hammer', cap);
+  if (combo === 14) return bumpSpecial(bumpSpecial(specials, 'joker', cap), 'bomb', cap);
   return specials;
 }
 
@@ -383,19 +406,20 @@ function awardSpecialsForLineMilestone(
   newLines: number,
   boardSize: number,
   specials: SpecialInventory,
+  cap: number,
 ): SpecialInventory {
   let next = specials;
   const prevCells = prevLines * boardSize;
   const newCells = newLines * boardSize;
 
   if (Math.floor(newCells / CELLS_PER_BOMB) > Math.floor(prevCells / CELLS_PER_BOMB)) {
-    next = bumpSpecial(next, 'bomb');
+    next = bumpSpecial(next, 'bomb', cap);
   }
   if (Math.floor(newCells / CELLS_PER_HAMMER) > Math.floor(prevCells / CELLS_PER_HAMMER)) {
-    next = bumpSpecial(next, 'hammer');
+    next = bumpSpecial(next, 'hammer', cap);
   }
   if (Math.floor(newCells / CELLS_PER_JOKER) > Math.floor(prevCells / CELLS_PER_JOKER)) {
-    next = bumpSpecial(next, 'joker');
+    next = bumpSpecial(next, 'joker', cap);
   }
   return next;
 }
@@ -439,7 +463,8 @@ function applyPlacement(
     const k = options.consumeSpecial;
     newSpecials = { ...newSpecials, [k]: Math.max(0, newSpecials[k] - 1) };
   }
-  newSpecials = awardSpecialsForCombo(newCombo, newSpecials);
+  const cap = specialCapForBoard(state.boardSize);
+  newSpecials = awardSpecialsForCombo(newCombo, newSpecials, cap);
   const prevTotalLines = state.rowsCleared + state.colsCleared;
   const newTotalLines = prevTotalLines + cleared.clearedRows.length + cleared.clearedCols.length;
   newSpecials = awardSpecialsForLineMilestone(
@@ -447,6 +472,7 @@ function applyPlacement(
     newTotalLines,
     state.boardSize,
     newSpecials,
+    cap,
   );
 
   let next: GameState = {

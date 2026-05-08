@@ -130,11 +130,10 @@ export const MODES: Record<GameMode, ModeConfig> = {
     solvabilityGuarantee: true,
     initialBoard: reverseSetup,
     goal: { clears: 8 },
-    // Großzügiger Start-Vorrat: 3 von jeder Sorte. Sie sind hier
-    // wirklich gebraucht, weil das Brett mit verstreuten Lücken
-    // beginnt -- gerade auf größeren Feldern (12x12) sind passende
-    // Pieces selten platzierbar.
-    initialSpecials: { bomb: 3, hammer: 3, joker: 3 },
+    // Marker-Wert: tatsaechlich wird das brettgr-abh. Cap als
+    // Start-Vorrat verwendet (siehe newGame). 99 ist ein hoher
+    // Wert, der vom Clamp ohnehin auf cap gedeckelt wird.
+    initialSpecials: { bomb: 99, hammer: 99, joker: 99 },
   },
   shrink: {
     id: 'shrink',
