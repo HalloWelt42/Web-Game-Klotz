@@ -4,6 +4,7 @@ import {
   cloneBoard,
   cloneObstacles,
   findFirstFit,
+  freeBoundingBox,
   isAnyPlaceable,
   place,
 } from './board';
@@ -55,15 +56,22 @@ function rollPoolBasic(
   const standard = modePool(mode);
   const specials = modeSpecials(mode);
   const cfg = MODES[mode];
-  // Wenn der Modus eine Solvability-Garantie hat und uns ein Brett
-  // bekannt ist, beschränken wir die Auswahl auf Steine, die aktuell
-  // ueberhaupt platzierbar sind. Damit kommen z.B. im Shrink keine
-  // Pieces, die größer sind als das geschrumpfte Innere.
-  const placeable =
-    board && cfg.solvabilityGuarantee
-      ? standard.filter((p) => findFirstFit(board, p, obstacles ?? {}))
-      : standard;
-  const pool = placeable.length > 0 ? placeable : standard;
+  // Filter nach FELDMAXIMA: Wir prüfen nicht, ob der Stein gerade
+  // platzierbar ist (das wäre zu restriktiv -- bei halbvollem Brett
+  // kämen kaum noch Optionen), sondern nur, ob er VON DER GRÖSSE HER
+  // theoretisch in den nicht-Block-Bereich passt. Damit kommen z.B.
+  // im Shrink keine I5-Pieces mehr, wenn das Innere nur 4x4 ist;
+  // Zellen-Belegungen sind aber egal.
+  let pool = standard;
+  if (board && cfg.solvabilityGuarantee) {
+    const bbox = freeBoundingBox(board, obstacles ?? {});
+    if (bbox.width > 0 && bbox.height > 0) {
+      const fits = standard.filter(
+        (p) => p.width <= bbox.width && p.height <= bbox.height,
+      );
+      if (fits.length > 0) pool = fits;
+    }
+  }
 
   const slots: PoolSlot[] = [];
   for (let i = 0; i < 3; i++) {

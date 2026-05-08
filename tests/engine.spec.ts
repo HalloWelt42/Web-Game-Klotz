@@ -326,9 +326,10 @@ describe('engine.shrink', () => {
     expect(countBlocks(out!.state)).toBe(36);
   });
 
-  it('rollPool im Shrink: keine Steine größer als Innenfläche', () => {
-    // Simuliere ein Brett mit Block-Ring (Innenfläche 4x4 in der Mitte
-    // eines 10x10-Bretts). rollPool darf keine Pieces > 4x4 zurückliefern.
+  it('rollPool filtert nach Feldmaxima -- keine Steine groesser als nicht-Block-Bereich', () => {
+    // Block-Ring auf 10x10 mit innerer 4x4-Fläche (x:3-6, y:3-6).
+    // rollPool darf keine Pieces > 4 in einer Dimension zurückliefern,
+    // unabhängig vom aktuellen Belegungszustand.
     const board = emptyBoard();
     const obstacles: Record<string, 'block' | 'ice'> = {};
     for (let i = 0; i < 10; i++) {
@@ -339,7 +340,12 @@ describe('engine.shrink', () => {
         obstacles[`${9 - j},${i}`] = 'block';
       }
     }
-    // 100 Pool-Rolls -- kein Stein darf 5+ Zellen breit/hoch sein
+    // Auch wenn die innere Fläche teilweise belegt ist, soll der Filter
+    // nur die Größe checken, nicht die aktuelle Platzierbarkeit:
+    board[3][3] = '--piece-blue';
+    board[3][4] = '--piece-blue';
+    board[4][3] = '--piece-blue';
+
     for (let attempt = 0; attempt < 100; attempt++) {
       const rng = mulberry32(attempt + 1);
       const pool = rollPool(rng, 'shrink', board, obstacles);

@@ -207,6 +207,33 @@ export function clearLines(board: Board, obstacles: ObstacleMap = {}): ClearResu
   };
 }
 
+// Liefert die Bounding-Box des nicht-Block-Bereichs -- also die maximalen
+// Maße, in die ein Stein im aktuellen Brett überhaupt theoretisch passen
+// kann (unabhängig davon, ob diese Zellen aktuell belegt oder frei sind).
+// Wird zum Pool-Auswurf genutzt: Steine, die größer als diese Box sind,
+// hätten nie eine Chance, gelegt zu werden.
+export function freeBoundingBox(
+  board: Board,
+  obstacles: ObstacleMap = {},
+): { width: number; height: number } {
+  const size = boardSizeOf(board);
+  let minX = size;
+  let maxX = -1;
+  let minY = size;
+  let maxY = -1;
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      if (obstacles[obstacleKey(x, y)] === 'block') continue;
+      if (x < minX) minX = x;
+      if (x > maxX) maxX = x;
+      if (y < minY) minY = y;
+      if (y > maxY) maxY = y;
+    }
+  }
+  if (maxX < 0) return { width: 0, height: 0 };
+  return { width: maxX - minX + 1, height: maxY - minY + 1 };
+}
+
 export function findFirstFit(
   board: Board,
   piece: Piece,
