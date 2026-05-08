@@ -13,20 +13,55 @@ import type { GameState } from '../src/lib/game/types';
 
 type Move = { slot: 0 | 1 | 2; x: number; y: number };
 
+function evaluateState(state: GameState): number {
+  const size = state.boardSize;
+  let filled = 0;
+  let nearFullBonus = 0;
+
+  // Reihen-Analyse
+  for (let r = 0; r < size; r++) {
+    let rowFilled = 0;
+    let rowPlayable = 0;
+    for (let c = 0; c < size; c++) {
+      const k = `${c},${r}`;
+      if (state.obstacles[k] === 'block') continue;
+      rowPlayable++;
+      if (state.board[r][c]) {
+        rowFilled++;
+        filled++;
+      }
+    }
+    // Reihen, die fast voll sind, sind potentielle Räumungen
+    if (rowPlayable > 0 && rowFilled >= rowPlayable - 2 && rowFilled < rowPlayable) {
+      nearFullBonus += (rowFilled - (rowPlayable - 3)) * 8;
+    }
+  }
+  // Spalten-Analyse
+  for (let c = 0; c < size; c++) {
+    let colFilled = 0;
+    let colPlayable = 0;
+    for (let r = 0; r < size; r++) {
+      const k = `${c},${r}`;
+      if (state.obstacles[k] === 'block') continue;
+      colPlayable++;
+      if (state.board[r][c]) colFilled++;
+    }
+    if (colPlayable > 0 && colFilled >= colPlayable - 2 && colFilled < colPlayable) {
+      nearFullBonus += (colFilled - (colPlayable - 3)) * 8;
+    }
+  }
+
+  return -filled * 0.5 + nearFullBonus + state.combo * 5;
+}
+
 function evaluateMove(state: GameState, move: Move): number | null {
   const out = tryPlace(state, move.slot, move.x, move.y);
   if (!out) return null;
   const lines = out.cleared.rows.length + out.cleared.cols.length;
-  const next = out.state;
-  let filled = 0;
-  for (let r = 0; r < next.boardSize; r++) {
-    for (let c = 0; c < next.boardSize; c++) {
-      if (next.board[r][c]) filled++;
-    }
-  }
-  // Hauptgewicht: erreichte Punkte. Plus Bonus fuer Linien (Combo-Aufbau),
-  // Abzug fuer fuelle (Brett bleibt offen).
-  return out.pointsGained + lines * 80 - filled * 0.4;
+  let score = out.pointsGained * 1.5;
+  score += lines * 60;
+  score += evaluateState(out.state);
+  return score;
 }
 
 function bestMove(state: GameState): Move | null {

@@ -59,8 +59,8 @@ export const LEVELS: Level[] = [
   {
     id: 'level-6',
     title: 'Gut gemischt',
-    description: '220 Punkte in 24 Zügen.',
-    goal: { points: 220 },
+    description: '180 Punkte in 24 Zügen.',
+    goal: { points: 180 },
     movesLimit: 24,
     blockCount: 4,
     iceCount: 3,
@@ -77,8 +77,8 @@ export const LEVELS: Level[] = [
   {
     id: 'level-8',
     title: 'Belastungstest',
-    description: '260 Punkte in 28 Zügen, viele Hindernisse.',
-    goal: { points: 260 },
+    description: '220 Punkte in 28 Zügen, viele Hindernisse.',
+    goal: { points: 220 },
     movesLimit: 28,
     blockCount: 5,
     iceCount: 4,
@@ -95,8 +95,8 @@ export const LEVELS: Level[] = [
   {
     id: 'level-10',
     title: 'Endspiel',
-    description: '360 Punkte in 32 Zügen, brutaler Aufbau.',
-    goal: { points: 360 },
+    description: '300 Punkte in 32 Zügen, brutaler Aufbau.',
+    goal: { points: 300 },
     movesLimit: 32,
     blockCount: 6,
     iceCount: 5,
