@@ -97,22 +97,26 @@ export function fullRows(board: Board, obstacles: ObstacleMap = {}): number[] {
   const rows: number[] = [];
   for (let y = 0; y < size; y++) {
     let full = true;
-    let anyNonBlock = false;
+    let hasStoneCell = false;
     for (let x = 0; x < size; x++) {
       const k = obstacleKey(x, y);
-      if (obstacles[k] === 'block') {
+      // Block UND Ice werden für den Vollheits-Check übersprungen.
+      // Block ist permanent, Ice ist temporäres Hindernis -- beide
+      // sind aber ohne darauf gelegten Stein, also dürfen sie nicht
+      // als "leeres Feld" das full=false setzen. Ohne diesen Skip
+      // könnte eine Reihe mit Eis nie voll werden, das Eis nie tauen.
+      if (obstacles[k] === 'block' || obstacles[k] === 'ice') {
         continue;
       }
-      anyNonBlock = true;
+      hasStoneCell = true;
       if (board[y][x] === null) {
         full = false;
         break;
       }
     }
-    // Eine Reihe, die komplett aus Block-Feldern besteht (z.B. Shrink-
-    // Außenring), darf nicht als "voll" zählen -- sonst löst sie bei
-    // jedem Zug eine Phantom-Räumung mit Combo und Bonus aus.
-    if (full && anyNonBlock) rows.push(y);
+    // Eine Reihe ohne echte Stein-Zelle (nur aus Block oder nur aus
+    // Block+Ice) darf nicht als voll zählen, sonst Phantom-Räumung.
+    if (full && hasStoneCell) rows.push(y);
   }
   return rows;
 }
@@ -122,19 +126,19 @@ export function fullCols(board: Board, obstacles: ObstacleMap = {}): number[] {
   const cols: number[] = [];
   for (let x = 0; x < size; x++) {
     let full = true;
-    let anyNonBlock = false;
+    let hasStoneCell = false;
     for (let y = 0; y < size; y++) {
       const k = obstacleKey(x, y);
-      if (obstacles[k] === 'block') {
+      if (obstacles[k] === 'block' || obstacles[k] === 'ice') {
         continue;
       }
-      anyNonBlock = true;
+      hasStoneCell = true;
       if (board[y][x] === null) {
         full = false;
         break;
       }
     }
-    if (full && anyNonBlock) cols.push(x);
+    if (full && hasStoneCell) cols.push(x);
   }
   return cols;
 }

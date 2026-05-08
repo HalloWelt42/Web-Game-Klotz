@@ -418,6 +418,44 @@ describe('engine.shrink', () => {
   });
 });
 
+describe('engine.eis (Ice-Felder)', () => {
+  it('eine Reihe mit Eis und sonst vollen Steinen wird geräumt, das Eis taut', () => {
+    // Reihe 5 hat ein Eisfeld bei x=3, alle anderen 9 Zellen sind belegt
+    const board = emptyBoard();
+    const obstacles: Record<string, 'block' | 'ice'> = {};
+    obstacles['3,5'] = 'ice';
+    for (let x = 0; x < 10; x++) {
+      if (x === 3) continue; // hier ist das Eis
+      board[5][x] = '--piece-blue';
+    }
+    // Lücke bei (0,9): wir setzen einen U1, was die letzte freie Zelle
+    // belegen würde -- aber es gibt ja schon keine, also nehmen wir Reihe 9
+    // mit einer Lücke
+    for (let x = 0; x < 9; x++) board[9][x] = '--piece-green';
+
+    const u1 = pieceById('U1')!;
+    let s: GameState = {
+      ...newGame('level', 1, 'level-3'),
+    };
+    s = withBoard(withPool(s, [
+      { piece: u1, consumed: false },
+      { piece: u1, consumed: false },
+      { piece: u1, consumed: false },
+    ]), board);
+    s = { ...s, obstacles };
+
+    // U1 in die letzte freie Zelle von Reihe 9 setzen -- räumt Reihe 9.
+    // Reihe 5 ist auch voll (alle Stein-Zellen belegt, Eis als Lücke ignoriert)
+    // und müsste damit auch geräumt werden.
+    const out = tryPlace(s, 0, 9, 9);
+    expect(out).not.toBeNull();
+    // Reihe 5 sollte als geräumt erkannt werden -> rowsCleared >= 2
+    expect(out!.state.rowsCleared).toBeGreaterThanOrEqual(2);
+    // Eis bei (3,5) muss getaut sein -- nicht mehr in obstacles
+    expect(out!.state.obstacles['3,5']).toBeUndefined();
+  });
+});
+
 describe('engine.phantom-linien (Block-Ring)', () => {
   it('eine reine Block-Reihe gilt NICHT als geräumte Linie', () => {
     // Simuliere Shrink-State mit Block-Ring: y=0, y=9, x=0, x=9 sind Block.
