@@ -8,7 +8,9 @@ import {
   canSkip,
   newFromReplay,
   tickTimer,
+  rollPool,
 } from '../src/lib/game/engine';
+import { mulberry32 } from '../src/lib/game/rng';
 import { pieceById } from '../src/lib/game/pieces';
 import { emptyBoard } from '../src/lib/game/board';
 import type { GameState, Pool, Replay } from '../src/lib/game/types';
@@ -251,32 +253,30 @@ describe('engine.shrink', () => {
     expect(countBlocks(s)).toBe(0);
   });
 
-  it('schrumpft alle 8 Züge einen Ring nach innen', () => {
-    // Direkter Test: movesCount = 7 -> nach einem weiteren Zug = 8 ergibt Ring 1
+  it('schrumpft erstmals nach 30 Zügen (Tick 1 -> Ring 1)', () => {
     const u1 = pieceById('U1')!;
     let s: GameState = {
       ...newGame('shrink', 1),
-      movesCount: 7,
+      movesCount: 29,
     };
     s = withPool(s, [
       { piece: u1, consumed: false },
       { piece: u1, consumed: false },
       { piece: u1, consumed: false },
     ]);
-    // Vor dem entscheidenden Zug: kein Ring
     expect(countBlocks(s)).toBe(0);
     const out = tryPlace(s, 0, 4, 4);
     expect(out).not.toBeNull();
-    expect(out!.state.movesCount).toBe(8);
-    // Ring 1 in 10x10 -> äußerste Zellen werden Block: 4 Seiten * 10 - 4 Ecken = 36
+    expect(out!.state.movesCount).toBe(30);
+    // Ring 1 in 10x10 -> 36 Block-Felder
     expect(countBlocks(out!.state)).toBe(36);
   });
 
-  it('schrumpft erst nach 8 Zügen, nicht früher', () => {
+  it('schrumpft nicht vor dem 30. Zug', () => {
     const u1 = pieceById('U1')!;
     let s: GameState = {
       ...newGame('shrink', 1),
-      movesCount: 6,
+      movesCount: 28,
     };
     s = withPool(s, [
       { piece: u1, consumed: false },
@@ -285,17 +285,16 @@ describe('engine.shrink', () => {
     ]);
     const out = tryPlace(s, 0, 4, 4);
     expect(out).not.toBeNull();
-    expect(out!.state.movesCount).toBe(7);
+    expect(out!.state.movesCount).toBe(29);
     expect(countBlocks(out!.state)).toBe(0);
   });
 
-  it('Combo wird bei jedem Schrumpf-Tick zurückgesetzt', () => {
+  it('Combo wird beim Schrumpf-Tick zurückgesetzt (Ring 1 -> 2 bei movesCount=55)', () => {
     const u1 = pieceById('U1')!;
-    // movesCount=15 -> nach +1 wird movesCount=16, das ist der 2. Schrumpf-Tick
     let s: GameState = {
       ...newGame('shrink', 1),
       combo: 7,
-      movesCount: 15,
+      movesCount: 54,
     };
     s = withPool(s, [
       { piece: u1, consumed: false },
@@ -304,18 +303,17 @@ describe('engine.shrink', () => {
     ]);
     const out = tryPlace(s, 0, 4, 4);
     expect(out).not.toBeNull();
-    expect(out!.state.movesCount).toBe(16);
-    // Schrumpf-Tick greift -> Combo ist 0, völlig unabhängig vom vorherigen Wert
+    expect(out!.state.movesCount).toBe(55);
     expect(out!.state.combo).toBe(0);
   });
 
   it('zwischen Schrumpf-Ticks bleibt der Block-Ring stabil', () => {
     const u1 = pieceById('U1')!;
-    // movesCount=10 -> nach +1 wird movesCount=11, zwischen Tick 1 (8) und Tick 2 (16)
+    // movesCount=40 -> nach +1 wird movesCount=41, zwischen Tick 1 (30) und Tick 2 (55)
     let s: GameState = {
       ...newGame('shrink', 1),
       combo: 4,
-      movesCount: 10,
+      movesCount: 40,
     };
     s = withPool(s, [
       { piece: u1, consumed: false },
@@ -324,19 +322,40 @@ describe('engine.shrink', () => {
     ]);
     const out = tryPlace(s, 0, 4, 4);
     expect(out).not.toBeNull();
-    expect(out!.state.movesCount).toBe(11);
-    // Block-Ring darf sich nicht verändert haben (immer noch Ring 1 = 36 Blocks)
+    expect(out!.state.movesCount).toBe(41);
     expect(countBlocks(out!.state)).toBe(36);
   });
 
+  it('rollPool im Shrink: keine Steine größer als Innenfläche', () => {
+    // Simuliere ein Brett mit Block-Ring (Innenfläche 4x4 in der Mitte
+    // eines 10x10-Bretts). rollPool darf keine Pieces > 4x4 zurückliefern.
+    const board = emptyBoard();
+    const obstacles: Record<string, 'block' | 'ice'> = {};
+    for (let i = 0; i < 10; i++) {
+      for (let j = 0; j < 3; j++) {
+        obstacles[`${i},${j}`] = 'block';
+        obstacles[`${i},${9 - j}`] = 'block';
+        obstacles[`${j},${i}`] = 'block';
+        obstacles[`${9 - j},${i}`] = 'block';
+      }
+    }
+    // 100 Pool-Rolls -- kein Stein darf 5+ Zellen breit/hoch sein
+    for (let attempt = 0; attempt < 100; attempt++) {
+      const rng = mulberry32(attempt + 1);
+      const pool = rollPool(rng, 'shrink', board, obstacles);
+      for (const slot of pool) {
+        expect(slot.piece.width).toBeLessThanOrEqual(4);
+        expect(slot.piece.height).toBeLessThanOrEqual(4);
+      }
+    }
+  });
+
   it('Pool wird nach Schrumpf-Tick revalidiert -- kein Patt durch zu große Steine', () => {
-    // Der Pool enthält ein I5H (5 Zellen breit). Nach Tick 3 ist die
-    // Innenfläche nur noch 4x4, ein I5H passt da nicht mehr -- der Engine
-    // muss den unspielbaren Slot durch ein passendes Piece ersetzen.
+    // Tick 3 (Ring 3) tritt bei movesCount 75 ein. Innenfläche danach = 4x4.
     const i5h = pieceById('I5H')!;
     let s: GameState = {
       ...newGame('shrink', 1),
-      movesCount: 23, // beim nächsten Zug -> 24, Ring 3 bei SHRINK_INTERVAL=8
+      movesCount: 74,
     };
     s = withPool(s, [
       { piece: pieceById('U1')!, consumed: false },
@@ -347,19 +366,17 @@ describe('engine.shrink', () => {
     expect(out).not.toBeNull();
     const placeable = out!.state.pool.some((slot) => {
       if (slot.consumed) return false;
-      // Innenfläche nach Ring 3 ist 4x4 -- I5H (Breite 5) passt nicht
       return slot.piece.width <= 4 && slot.piece.height <= 4;
     });
     expect(placeable).toBe(true);
   });
 
-  it('Game Over sobald Innenfläche 2x2 erreicht (10x10 -> Ring 4)', () => {
-    // 10x10, ringCap = (10-2)/2 = 4. Bei movesCount 32 (= 4 * SHRINK_INTERVAL=8)
-    // springt der Ring von 3 auf 4 -- ringCap erreicht -> Game Over.
+  it('Game Over sobald Innenfläche 2x2 erreicht (Ring 4 bei movesCount=90)', () => {
+    // ringCap = (10-2)/2 = 4. Schwellen: 30, 55, 75, 90.
     const u1 = pieceById('U1')!;
     let s: GameState = {
       ...newGame('shrink', 1),
-      movesCount: 31,
+      movesCount: 89,
     };
     s = withPool(s, [
       { piece: u1, consumed: false },
@@ -368,7 +385,7 @@ describe('engine.shrink', () => {
     ]);
     const out = tryPlace(s, 0, 4, 4);
     expect(out).not.toBeNull();
-    expect(out!.state.movesCount).toBe(32);
+    expect(out!.state.movesCount).toBe(90);
     expect(out!.state.status).toBe('gameover');
   });
 
@@ -403,7 +420,7 @@ describe('engine.phantom-linien (Block-Ring)', () => {
     const u1 = pieceById('U1')!;
     let s: GameState = {
       ...newGame('shrink', 1),
-      movesCount: 7, // beim nächsten Zug -> 8 = Tick 1
+      movesCount: 29, // beim nächsten Zug -> 30 = Tick 1
     };
     s = withPool(s, [
       { piece: u1, consumed: false },

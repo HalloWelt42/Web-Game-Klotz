@@ -39,8 +39,8 @@
     },
     shrink: {
       title: 'Shrink',
-      tip: 'Brett schrumpft alle 8 Züge um eine Reihe nach innen. Jeder Schrumpf bricht die Combo. Sobald die Innenfläche 2x2 erreicht, ist Schluss.',
-      controls: ['Brettrand wird zu Block', 'Combo-Reset bei jedem Schrumpf', 'Game Over bei 2x2 Innenfläche'],
+      tip: 'Erstes Schrumpfen nach 30 Zügen, dann immer schneller (25, 20, 15, 10). Jeder Schrumpf bricht die Combo. Sobald die Innenfläche 2x2 erreicht, ist Schluss.',
+      controls: ['Brettrand wird zu Block', 'Pool zeigt nur Steine, die noch passen', 'Game Over bei 2x2 Innenfläche'],
     },
   };
 

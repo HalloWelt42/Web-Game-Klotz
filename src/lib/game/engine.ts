@@ -46,17 +46,32 @@ function pickFromPool(rng: Rng, pool: Piece[]): Piece {
   return pool[pool.length - 1];
 }
 
-function rollPoolBasic(rng: Rng, mode: GameMode): Pool {
+function rollPoolBasic(
+  rng: Rng,
+  mode: GameMode,
+  board?: Board,
+  obstacles?: ObstacleMap,
+): Pool {
   const standard = modePool(mode);
   const specials = modeSpecials(mode);
   const cfg = MODES[mode];
+  // Wenn der Modus eine Solvability-Garantie hat und uns ein Brett
+  // bekannt ist, beschränken wir die Auswahl auf Steine, die aktuell
+  // ueberhaupt platzierbar sind. Damit kommen z.B. im Shrink keine
+  // Pieces, die größer sind als das geschrumpfte Innere.
+  const placeable =
+    board && cfg.solvabilityGuarantee
+      ? standard.filter((p) => findFirstFit(board, p, obstacles ?? {}))
+      : standard;
+  const pool = placeable.length > 0 ? placeable : standard;
+
   const slots: PoolSlot[] = [];
   for (let i = 0; i < 3; i++) {
     let piece: Piece;
     if (specials.length > 0 && rng() < cfg.specialChance) {
       piece = pickFromPool(rng, specials);
     } else {
-      piece = pickFromPool(rng, standard);
+      piece = pickFromPool(rng, pool);
     }
     slots.push({ piece, consumed: false });
   }
@@ -100,22 +115,10 @@ export function rollPool(
   board?: Board,
   obstacles?: ObstacleMap,
 ): Pool {
-  const cfg = MODES[mode];
-  const guarantee = cfg.solvabilityGuarantee && board !== undefined;
-  for (let attempt = 0; attempt < 30; attempt++) {
-    const pool = rollPoolBasic(rng, mode);
-    if (!guarantee) return pool;
-    if (poolHasPlacement(board, obstacles ?? {}, pool)) return pool;
-  }
-  for (let attempt = 0; attempt < 50; attempt++) {
-    const piece = pickFromPool(rng, STANDARD_PIECES);
-    if (board && findFirstFit(board, piece, obstacles ?? {})) {
-      const others = rollPoolBasic(rng, mode);
-      others[0] = { piece, consumed: false };
-      return others;
-    }
-  }
-  return rollPoolBasic(rng, mode);
+  // Pool-Filterung wird in rollPoolBasic gemacht, wenn der Modus eine
+  // Solvability-Garantie hat -- separate Versuchsschleifen sind dadurch
+  // unnötig.
+  return rollPoolBasic(rng, mode, board, obstacles);
 }
 
 export type NewGameOptions = {
@@ -238,19 +241,36 @@ function refillIfEmpty(state: GameState): GameState {
   return state;
 }
 
-export const SHRINK_INTERVAL = 8;
+// Variabel: Erstes Schrumpfen kommt spät (30 Züge -- Anfänger-Phase),
+// danach immer schneller. So fühlt es sich anfangs nicht erstickt an,
+// wird aber im Endspiel druckvoll.
+//   Ring 0 -> 1 nach 30 Zügen
+//   Ring 1 -> 2 nach weiteren 25 (gesamt 55)
+//   Ring 2 -> 3 nach weiteren 20 (gesamt 75)
+//   Ring 3 -> 4 nach weiteren 15 (gesamt 90)
+//   Ring 4 -> 5 nach weiteren 10 (gesamt 100, falls ringCap das zulässt)
+function shrinkIntervalForRing(ring: number): number {
+  return Math.max(10, 30 - ring * 5);
+}
+
+function ringForMoves(movesCount: number, ringCap: number): number {
+  let total = 0;
+  for (let r = 0; r < ringCap; r++) {
+    total += shrinkIntervalForRing(r);
+    if (movesCount < total) return r;
+  }
+  return ringCap;
+}
 
 function shrinkIfNeeded(state: GameState): GameState {
   if (!state.shrinking) return state;
-  const targetRing = Math.floor(state.movesCount / SHRINK_INTERVAL);
-  if (targetRing === 0) return state;
   const size = state.boardSize;
   // Mindestinnenfläche 2x2 -- darunter wäre die Partie aussichtslos.
   const ringCap = Math.max(0, Math.floor((size - 2) / 2));
-  const ring = Math.min(targetRing, ringCap);
+  const ring = ringForMoves(state.movesCount, ringCap);
+  if (ring === 0) return state;
   // Erkennen, ob in genau diesem Zug eine neue Schrumpfstufe gegriffen hat.
-  const previousMoves = Math.max(0, state.movesCount - 1);
-  const previousRing = Math.min(ringCap, Math.floor(previousMoves / SHRINK_INTERVAL));
+  const previousRing = ringForMoves(Math.max(0, state.movesCount - 1), ringCap);
   const justShrunk = ring > previousRing;
 
   const obs: ObstacleMap = cloneObstacles(state.obstacles);
