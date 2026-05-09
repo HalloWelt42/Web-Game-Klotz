@@ -187,6 +187,14 @@ export function newGame(
     }
   }
 
+  // Goal an Brettgröße anpassen: bei Reverse skaliert die Anzahl
+  // benötigter Räumungen mit dem Brett (auf 12x12 ist eine Linie länger
+  // und schwerer voll, also relativ mehr Linien für gleiche Schwierigkeit
+  // pro Linie). Faustregel: clears = boardSize - 2.
+  if (mode === 'reverse' && goal && goal.clears !== undefined) {
+    goal = { ...goal, clears: Math.max(3, boardSize - 2) };
+  }
+
   const pool = rollPool(rng, mode, setup.board, setup.obstacles);
   const replay: Replay = { seed, mode, levelId, moves: [] };
   const rotationAllowed = opts.rotationOverride ?? cfg.rotationAllowed;
