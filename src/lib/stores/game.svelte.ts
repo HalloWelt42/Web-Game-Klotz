@@ -472,6 +472,11 @@ function createGameStore() {
       // ein internes Flag setzen.
       gameEndDismissed = true;
     },
+    // Dev-Helper: erlaubt dem Test/Konsole den State punktuell zu
+    // patchen, um Endzustände zu reproduzieren ohne ganze Partie.
+    __devSetState(patch: Partial<GameState>) {
+      state = { ...state, ...patch };
+    },
   };
 }
 
@@ -480,3 +485,8 @@ const ACHIEVEMENT_LOOKUP: Record<string, { title: string; icon: string }> = {};
 for (const a of ACHIEVEMENTS) ACHIEVEMENT_LOOKUP[a.id] = { title: a.title, icon: a.icon };
 
 export const game = createGameStore();
+
+// Dev-Hook fuer Browser-Konsole und JS-Eval-Tests
+if (import.meta.env.DEV && typeof window !== 'undefined') {
+  (window as unknown as { __klotz: { game: typeof game } }).__klotz = { game };
+}
